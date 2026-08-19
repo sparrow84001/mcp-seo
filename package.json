@@ -1,0 +1,40 @@
+{
+  "name": "mcp-seo",
+  "version": "1.0.0",
+  "description": "SEO, AEO, GEO, Local SEO & Digital Marketing Growth Auditor + Safe Code Fixer MCP Server",
+  "main": "dist/index.js",
+  "module": "src/index.ts",
+  "bin": {
+    "mcp-seo": "./dist/index.js"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "bun build src/index.ts --outdir dist --target node",
+    "start": "bun run src/index.ts",
+    "dev": "bun run src/index.ts",
+    "test": "bun test"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "seo",
+    "aeo",
+    "geo",
+    "local-seo",
+    "technical-seo",
+    "digital-marketing",
+    "conversion-rate-optimization",
+    "code-fixer"
+  ],
+  "author": "sparrow8400 <sparrow8400@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "cheerio": "^1.2.0",
+    "fast-glob": "^3.3.3",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}
