@@ -1,0 +1,10 @@
+# Smithery.ai Configuration for MCP-SEO
+# https://smithery.ai/docs/config
+
+startCommand:
+  type: "stdio"
+  config:
+    command: "bun"
+    args:
+      - "run"
+      - "src/index.ts"
