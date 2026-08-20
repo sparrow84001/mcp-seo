@@ -48,7 +48,7 @@ Designed for seamless integration with **Antigravity 2.0**, **GitHub Copilot**, 
 
 ```bash
 # Clone and install dependencies
-cd d:/SNtemp/mcp/mcp-seo
+cd /path/to/mcp-seo
 bun install
 
 # Run test suite
@@ -65,7 +65,7 @@ bun start
 ```
 
 > [!TIP]
-> **Standalone Executable Available:** You can compile a single standalone `.exe` using `bun run compile` which runs without requiring Bun or Node.js on the host machine. See [EXE_USAGE_GUIDE.md](file:///d:/SNtemp/mcp/mcp-seo/EXE_USAGE_GUIDE.md) for setup instructions.
+> **Standalone Executable Available:** You can compile a single standalone `.exe` using `bun run compile` which runs without requiring Bun or Node.js on the host machine. See [EXE_USAGE_GUIDE.md](./EXE_USAGE_GUIDE.md) for setup instructions.
 
 ---
 
@@ -80,7 +80,7 @@ Add the server to your Antigravity global configuration or workspace `.agy/mcp.j
   "mcpServers": {
     "seo-auditor": {
       "command": "bun",
-      "args": ["d:/SNtemp/mcp/mcp-seo/src/index.ts"]
+      "args": ["/path/to/mcp-seo/src/index.ts"]
     }
   }
 }
@@ -95,7 +95,7 @@ In `.vscode/settings.json` (or `.codeium/mcp.json`):
   "github.copilot.chat.mcpServers": {
     "seo-auditor": {
       "command": "bun",
-      "args": ["d:/SNtemp/mcp/mcp-seo/src/index.ts"]
+      "args": ["/path/to/mcp-seo/src/index.ts"]
     }
   }
 }
@@ -119,7 +119,7 @@ Add to `%APPDATA%/Claude/claude_desktop_config.json` (Windows) or `~/Library/App
   "mcpServers": {
     "seo-growth-auditor": {
       "command": "bun",
-      "args": ["d:/SNtemp/mcp/mcp-seo/src/index.ts"]
+      "args": ["/path/to/mcp-seo/src/index.ts"]
     }
   }
 }
@@ -134,7 +134,7 @@ Add to `.cursor/mcp.json` in your project root:
   "mcpServers": {
     "seo-auditor": {
       "command": "bun",
-      "args": ["d:/SNtemp/mcp/mcp-seo/src/index.ts"]
+      "args": ["/path/to/mcp-seo/src/index.ts"]
     }
   }
 }

@@ -18,7 +18,7 @@ To build or recompile the standalone binary using **Bun 1.4**:
 
 ```bash
 # Navigate to the project root
-cd d:/SNtemp/mcp/mcp-seo
+cd /path/to/mcp-seo
 
 # Compile the standalone executable
 bun run compile
@@ -31,7 +31,7 @@ bun build --compile --minify ./src/index.ts --outfile ./bin/mcp-seo.exe
 
 The output binary will be generated at:
 ```
-d:\SNtemp\mcp\mcp-seo\bin\mcp-seo.exe
+./bin/mcp-seo.exe  (or C:\path\to\mcp-seo\bin\mcp-seo.exe on Windows)
 ```
 
 ---
@@ -49,7 +49,7 @@ Edit `%USERPROFILE%\.gemini\antigravity\mcp_config.json` (or `~/.gemini/antigrav
 {
   "mcpServers": {
     "seo-growth-auditor": {
-      "command": "d:/SNtemp/mcp/mcp-seo/bin/mcp-seo.exe",
+      "command": "C:/path/to/mcp-seo/bin/mcp-seo.exe",
       "args": []
     }
   }
@@ -63,7 +63,7 @@ Create `.agy/mcp.json` in your workspace root:
 {
   "mcpServers": {
     "seo-growth-auditor": {
-      "command": "d:/SNtemp/mcp/mcp-seo/bin/mcp-seo.exe",
+      "command": "C:/path/to/mcp-seo/bin/mcp-seo.exe",
       "args": []
     }
   }
@@ -80,7 +80,7 @@ In `.vscode/settings.json` (or user settings):
 {
   "github.copilot.chat.mcpServers": {
     "seo-growth-auditor": {
-      "command": "d:/SNtemp/mcp/mcp-seo/bin/mcp-seo.exe",
+      "command": "C:/path/to/mcp-seo/bin/mcp-seo.exe",
       "args": []
     }
   }
@@ -97,7 +97,7 @@ In `%APPDATA%\Claude\claude_desktop_config.json`:
 {
   "mcpServers": {
     "seo-growth-auditor": {
-      "command": "d:/SNtemp/mcp/mcp-seo/bin/mcp-seo.exe",
+      "command": "C:/path/to/mcp-seo/bin/mcp-seo.exe",
       "args": []
     }
   }
@@ -116,7 +116,7 @@ In `.cursor/mcp.json`:
 {
   "mcpServers": {
     "seo-growth-auditor": {
-      "command": "d:/SNtemp/mcp/mcp-seo/bin/mcp-seo.exe",
+      "command": "C:/path/to/mcp-seo/bin/mcp-seo.exe",
       "args": []
     }
   }
@@ -133,7 +133,7 @@ In `~/.codeium/windsurf/mcp_config.json`:
 {
   "mcpServers": {
     "seo-growth-auditor": {
-      "command": "d:/SNtemp/mcp/mcp-seo/bin/mcp-seo.exe",
+      "command": "C:/path/to/mcp-seo/bin/mcp-seo.exe",
       "args": []
     }
   }
@@ -150,7 +150,7 @@ In `mcp_settings.json`:
 {
   "mcpServers": {
     "seo-growth-auditor": {
-      "command": "d:/SNtemp/mcp/mcp-seo/bin/mcp-seo.exe",
+      "command": "C:/path/to/mcp-seo/bin/mcp-seo.exe",
       "args": [],
       "disabled": false,
       "autoApprove": []
@@ -201,6 +201,6 @@ If you want to use `mcp-seo.exe` from anywhere without typing the full path:
 
 ## 🔍 5. Troubleshooting & Tips
 
-* **Windows Backslashes:** In JSON configuration files, use forward slashes (`/`) or double backslashes (`\\`) for file paths (e.g. `"d:/SNtemp/mcp/mcp-seo/bin/mcp-seo.exe"` or `"d:\\SNtemp\\mcp\\mcp-seo\\bin\\mcp-seo.exe"`).
+* **Windows Backslashes:** In JSON configuration files, use forward slashes (`/`) or double backslashes (`\\`) for file paths (e.g. `"C:/path/to/mcp-seo/bin/mcp-seo.exe"` or `"C:\\path\\to\\mcp-seo\\bin\\mcp-seo.exe"`).
 * **Binary Updates:** Whenever you update TypeScript code in `src/`, make sure to re-run `bun run compile` so that `bin/mcp-seo.exe` incorporates the latest changes.
 * **Firewall / Antivirus:** Because Bun produces standalone native executables, some antivirus software may scan the binary on the very first execution. This is standard behavior.

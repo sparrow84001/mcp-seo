@@ -3,7 +3,7 @@
 This guide shows how to connect and use the **SEO, AEO, GEO & Digital Marketing Audit + Safe Fix MCP Server** with **GitHub Copilot**, **Antigravity 2.0**, **Claude Desktop**, **Cursor**, and **Cline / Roo Code**.
 
 > [!TIP]
-> **Using Standalone `.exe`?** You can replace `"command": "bun", "args": ["d:/.../src/index.ts"]` with `"command": "d:/SNtemp/mcp/mcp-seo/bin/mcp-seo.exe", "args": []` in any client below. For full details, see [EXE_USAGE_GUIDE.md](file:///d:/SNtemp/mcp/mcp-seo/EXE_USAGE_GUIDE.md).
+> **Using Standalone `.exe`?** You can replace `"command": "bun", "args": ["/path/to/mcp-seo/src/index.ts"]` with `"command": "/path/to/mcp-seo/bin/mcp-seo.exe", "args": []` in any client below. For full details, see [EXE_USAGE_GUIDE.md](./EXE_USAGE_GUIDE.md).
 
 ---
 
@@ -17,7 +17,7 @@ Edit or create `~/.gemini/antigravity/mcp_config.json` (or `%USERPROFILE%\.gemin
   "mcpServers": {
     "seo-growth-auditor": {
       "command": "bun",
-      "args": ["d:/SNtemp/mcp/mcp-seo/src/index.ts"]
+      "args": ["/path/to/mcp-seo/src/index.ts"]
     }
   }
 }
@@ -31,7 +31,7 @@ Create `.agy/mcp.json` in your project root:
   "mcpServers": {
     "seo-growth-auditor": {
       "command": "bun",
-      "args": ["d:/SNtemp/mcp/mcp-seo/src/index.ts"]
+      "args": ["/path/to/mcp-seo/src/index.ts"]
     }
   }
 }
@@ -49,7 +49,7 @@ In your project or user settings (`.vscode/settings.json`):
   "github.copilot.chat.mcpServers": {
     "seo-growth-auditor": {
       "command": "bun",
-      "args": ["d:/SNtemp/mcp/mcp-seo/src/index.ts"]
+      "args": ["/path/to/mcp-seo/src/index.ts"]
     }
   }
 }
@@ -85,7 +85,7 @@ When asked to audit, optimize, or fix SEO/AEO/GEO/marketing on this project:
   "mcpServers": {
     "seo-growth-auditor": {
       "command": "bun",
-      "args": ["d:/SNtemp/mcp/mcp-seo/src/index.ts"]
+      "args": ["/path/to/mcp-seo/src/index.ts"]
     }
   }
 }
@@ -104,7 +104,7 @@ Create or update `.cursor/mcp.json` in your workspace:
   "mcpServers": {
     "seo-growth-auditor": {
       "command": "bun",
-      "args": ["d:/SNtemp/mcp/mcp-seo/src/index.ts"]
+      "args": ["/path/to/mcp-seo/src/index.ts"]
     }
   }
 }
@@ -123,7 +123,7 @@ Add to `mcp_settings.json`:
   "mcpServers": {
     "seo-growth-auditor": {
       "command": "bun",
-      "args": ["d:/SNtemp/mcp/mcp-seo/src/index.ts"],
+      "args": ["/path/to/mcp-seo/src/index.ts"],
       "disabled": false,
       "autoApprove": []
     }
@@ -137,7 +137,7 @@ Add to `mcp_settings.json`:
 
 ```bash
 # Navigate to the MCP directory
-cd d:/SNtemp/mcp/mcp-seo
+cd /path/to/mcp-seo
 
 # Run all automated tests
 bun test
