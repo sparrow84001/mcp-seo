@@ -4,7 +4,6 @@
 startCommand:
   type: "stdio"
   config:
-    command: "bun"
+    command: "node"
     args:
-      - "run"
-      - "src/index.ts"
+      - "dist/index.js"

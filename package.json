@@ -11,6 +11,8 @@
   "type": "module",
   "scripts": {
     "build": "bun build src/index.ts --outdir dist --target node --minify",
+    "prepare": "bun build src/index.ts --outdir dist --target node --minify",
+    "prepublishOnly": "bun build src/index.ts --outdir dist --target node --minify",
     "compile": "bun build --compile --minify ./src/index.ts --outfile ./bin/mcp-seo.exe",
     "typecheck": "tsc --noEmit",
     "start": "bun run src/index.ts",
