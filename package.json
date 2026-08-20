@@ -1,5 +1,6 @@
 {
-  "name": "mcp-seo",
+  "name": "@sparrow84001/mcp-seo",
+  "mcpName": "io.github.sparrow84001/mcp-seo",
   "version": "1.0.0",
   "description": "SEO, AEO, GEO, Local SEO & Digital Marketing Growth Auditor + Safe Code Fixer MCP Server",
   "main": "dist/index.js",

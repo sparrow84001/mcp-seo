@@ -6,15 +6,5 @@
   "repository": {
     "url": "https://github.com/sparrow84001/mcp-seo",
     "source": "github"
-  },
-  "packages": [
-    {
-      "registryType": "npm",
-      "identifier": "mcp-seo",
-      "version": "1.0.0",
-      "transport": {
-        "type": "stdio"
-      }
-    }
-  ]
+  }
 }
