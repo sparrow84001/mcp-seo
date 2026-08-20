@@ -30,7 +30,20 @@
     "conversion-rate-optimization",
     "code-fixer"
   ],
-  "author": "sparrow8400 <sparrow8400@gmail.com>",
+  "author": {
+    "name": "Sayanta Neogi",
+    "email": "sparrow8400@gmail.com",
+    "url": "https://github.com/sparrow84001"
+  },
+  "homepage": "https://github.com/sparrow84001/mcp-seo#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sparrow84001/mcp-seo.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sparrow84001/mcp-seo/issues",
+    "email": "sparrow8400@gmail.com"
+  },
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",
