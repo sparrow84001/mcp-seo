@@ -186,6 +186,15 @@ Add to `.cursor/mcp.json` in your project root:
 
 ---
 
+## MCP Registry & Community Hubs
+
+This server is packaged and ready for the **Official Model Context Protocol Registry** and community directories:
+
+* **Official MCP Registry:** Follow the 4-step publishing process with `server.json` via [MCP_REGISTRY_SUBMISSION_GUIDE.md](./MCP_REGISTRY_SUBMISSION_GUIDE.md).
+* **Smithery.ai & Glama.ai:** Ready for 1-click indexing.
+
+---
+
 ## License
 
 MIT License. Developed for Antigravity, GitHub Copilot, and Claude AI Ecosystems.
