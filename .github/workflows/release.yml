@@ -1,0 +1,71 @@
+name: Build & Release Standalone Binaries
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  build-binaries:
+    name: Build Binary (${{ matrix.target.name }})
+    runs-on: ${{ matrix.target.os }}
+    strategy:
+      matrix:
+        target:
+          - os: windows-latest
+            name: windows-x64
+            outfile: bin/mcp-seo-windows-x64.exe
+          - os: ubuntu-latest
+            name: linux-x64
+            outfile: bin/mcp-seo-linux-x64
+          - os: macos-latest
+            name: darwin-arm64
+            outfile: bin/mcp-seo-darwin-arm64
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Compile Standalone Native Binary
+        run: |
+          mkdir -p bin
+          bun build --compile --minify ./src/index.ts --outfile ${{ matrix.target.outfile }}
+
+      - name: Upload Binary Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mcp-seo-${{ matrix.target.name }}
+          path: ${{ matrix.target.outfile }}
+
+  create-release:
+    name: Create GitHub Release
+    needs: build-binaries
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download all binary artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-artifacts/**/*
+          generate_release_notes: true

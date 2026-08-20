@@ -1,0 +1,53 @@
+name: CI & PR Validation
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    name: Test & Validate (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun 1.4
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: TypeScript 7 Strict Typecheck
+        run: bun run typecheck
+
+      - name: Run Test Suite
+        run: bun test
+
+      - name: Build Production Bundle
+        run: bun run build
+
+      - name: Compile Standalone Native Executable
+        run: bun run compile
+
+  mcp-registry-validation:
+    name: Validate MCP Registry Manifest (server.json)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download & Run mcp-publisher Validator
+        run: |
+          curl -L -o mcp-publisher.tar.gz "https://github.com/modelcontextprotocol/registry/releases/download/v1.8.1/mcp-publisher_linux_amd64.tar.gz"
+          tar -xzf mcp-publisher.tar.gz
+          ./mcp-publisher validate
