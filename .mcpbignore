@@ -1,0 +1,6 @@
+node_modules
+bin
+.git
+.gemini
+*.tar.gz
+mcp-publisher.exe

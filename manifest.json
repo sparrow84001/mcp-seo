@@ -1,0 +1,23 @@
+{
+  "manifest_version": "0.2",
+  "name": "mcp-seo",
+  "version": "1.0.0",
+  "description": "SEO, AEO, GEO, Local SEO & Digital Marketing Growth Auditor + Safe Code Fixer MCP Server",
+  "author": {
+    "name": "Sayanta Neogi",
+    "email": "sparrow8400@gmail.com",
+    "url": "https://github.com/sparrow84001"
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "dist/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/dist/index.js"
+      ],
+      "env": {}
+    }
+  },
+  "license": "MIT"
+}
