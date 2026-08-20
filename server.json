@@ -1,26 +1,20 @@
 {
-  "$schema": "https://raw.githubusercontent.com/modelcontextprotocol/registry/main/schema/server.json",
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.sparrow84001/mcp-seo",
-  "title": "SEO, AEO, GEO & Growth Auditor MCP",
-  "description": "Comprehensive SEO, AEO (AI Overviews, Perplexity), GEO, Local SEO, Content Quality, and Conversion (CRO) Auditor + Safe Framework-Aware Code Fixer.",
+  "description": "SEO, AEO, GEO, Local SEO & CRO Growth Auditor + Safe Code Fixer.",
   "version": "1.0.0",
-  "license": "MIT",
-  "homepage": "https://github.com/sparrow84001/mcp-seo",
   "repository": {
-    "type": "git",
-    "url": "https://github.com/sparrow84001/mcp-seo.git"
+    "url": "https://github.com/sparrow84001/mcp-seo",
+    "source": "github"
   },
-  "categories": [
-    "developer-tools",
-    "marketing",
-    "seo",
-    "ai-optimization"
-  ],
-  "runtime": {
-    "type": "bun",
-    "version": ">=1.4.0"
-  },
-  "transport": {
-    "type": "stdio"
-  }
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "mcp-seo",
+      "version": "1.0.0",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
 }
