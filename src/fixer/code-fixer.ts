@@ -35,14 +35,28 @@ export function generateCodeFix(options: CodeFixOptions): CodeFixPlan {
     updatedCode = applyNextAppRouterFixes(updatedCode, options);
   } else if (fw === 'nextjs-pages') {
     updatedCode = applyNextPagesRouterFixes(updatedCode, options);
+  } else if (fw === 'astro') {
+    updatedCode = applyAstroFixes(updatedCode, options);
   } else {
     updatedCode = applyGenericHtmlFixes(updatedCode, options);
   }
 
   const unifiedDiff = createUnifiedDiff(fullPath, originalCode, updatedCode);
 
-  if (options.applyDirectly) {
-    fs.writeFileSync(fullPath, updatedCode, 'utf8');
+  if (options.applyDirectly && originalCode !== updatedCode) {
+    const backupPath = `${fullPath}.bak`;
+    if (!fs.existsSync(backupPath)) {
+      if (typeof Bun !== 'undefined' && Bun.write) {
+        Bun.write(backupPath, originalCode);
+      } else {
+        fs.writeFileSync(backupPath, originalCode, 'utf8');
+      }
+    }
+    if (typeof Bun !== 'undefined' && Bun.write) {
+      Bun.write(fullPath, updatedCode);
+    } else {
+      fs.writeFileSync(fullPath, updatedCode, 'utf8');
+    }
   }
 
   return {
@@ -63,8 +77,29 @@ function detectFileFramework(filePath: string): FrameworkType {
   if (filePath.endsWith('.blade.php')) return 'laravel';
   if (filePath.includes('/app/') || filePath.includes('\\app\\')) return 'nextjs-app';
   if (filePath.includes('/pages/') || filePath.includes('\\pages\\')) return 'nextjs-pages';
+  if (filePath.endsWith('.astro')) return 'astro';
+  if (filePath.endsWith('.svelte')) return 'sveltekit';
   if (filePath.endsWith('.php')) return 'php-raw';
   return 'html-static';
+}
+
+function applyAstroFixes(code: string, opts: CodeFixOptions): string {
+  let res = code;
+  if (res.startsWith('---')) {
+    const parts = res.split('---');
+    if (parts.length >= 3) {
+      let frontmatter = parts[1] || '';
+      if (opts.title && !frontmatter.includes('title')) {
+        frontmatter += `\nconst title = "${escapeQuotes(opts.title)}";`;
+      }
+      if (opts.metaDescription && !frontmatter.includes('description')) {
+        frontmatter += `\nconst description = "${escapeQuotes(opts.metaDescription)}";`;
+      }
+      parts[1] = frontmatter;
+      res = parts.join('---');
+    }
+  }
+  return res;
 }
 
 function applyLaravelBladeFixes(code: string, opts: CodeFixOptions): string {

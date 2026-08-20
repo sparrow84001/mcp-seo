@@ -1,0 +1,8 @@
+@extends('layouts.app')
+
+@section('content')
+<div class="container">
+  <h1>Our Services</h1>
+  <p>We provide full stack digital growth services.</p>
+</div>
+@endsection

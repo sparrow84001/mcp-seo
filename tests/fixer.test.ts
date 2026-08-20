@@ -49,4 +49,34 @@ describe('Code Fixer & Validator', () => {
       fs.unlinkSync(tempFile);
     }
   });
+
+  it('should generate surgical fixes for Astro components', () => {
+    const tempAstro = path.resolve('tests/sample.astro');
+    fs.writeFileSync(
+      tempAstro,
+      `---
+const old = "test";
+---
+<html>
+<head></head>
+<body><h1>Astro</h1></body>
+</html>
+`,
+      'utf8'
+    );
+
+    const fix = generateCodeFix({
+      filePath: tempAstro,
+      framework: 'astro',
+      title: 'Astro SEO Optimized Page',
+      metaDescription: 'Astro page description'
+    });
+
+    expect(fix.proposedChange).toContain('const title = "Astro SEO Optimized Page";');
+    expect(fix.proposedChange).toContain('const description = "Astro page description";');
+
+    if (fs.existsSync(tempAstro)) {
+      fs.unlinkSync(tempAstro);
+    }
+  });
 });

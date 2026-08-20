@@ -47,5 +47,16 @@ export const MCP_PROMPTS = {
         required: true
       }
     ]
+  },
+  digital_marketing_growth_strategy: {
+    name: 'digital_marketing_growth_strategy',
+    description: 'Synthesizes full audit into a digital marketing growth blueprint with CRO levers, AI answer engine tactics, audience mapping, and a 30-60-90 day execution roadmap.',
+    arguments: [
+      {
+        name: 'target',
+        description: 'Directory path to the website codebase or a live URL (https://...) to formulate strategy for.',
+        required: true
+      }
+    ]
   }
 };

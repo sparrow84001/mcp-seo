@@ -7,6 +7,9 @@ describe('Crawler & Extractor', () => {
       <!DOCTYPE html>
       <html lang="en">
       <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="icon" href="/favicon.svg" />
         <title>Professional Web Design Services | BrandName</title>
         <meta name="description" content="Custom web design and development services for high-growth companies. Get a free consultation today." />
         <link rel="canonical" href="https://example.com/services/web-design" />
@@ -51,6 +54,9 @@ describe('Crawler & Extractor', () => {
     expect(data.title).toBe('Professional Web Design Services | BrandName');
     expect(data.metaDescription).toContain('Custom web design');
     expect(data.canonical).toBe('https://example.com/services/web-design');
+    expect(data.viewport).toContain('width=device-width');
+    expect(data.charset?.toLowerCase()).toContain('utf-8');
+    expect(data.favicon).toBe('/favicon.svg');
     expect(data.h1Count).toBe(1);
     expect(data.headings.length).toBe(2);
     expect(data.headings[0]?.text).toBe('Enterprise Web Design Solutions');

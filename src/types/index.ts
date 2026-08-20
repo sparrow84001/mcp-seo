@@ -6,6 +6,9 @@ export type FrameworkType =
   | 'vue'
   | 'nuxt'
   | 'astro'
+  | 'sveltekit'
+  | 'remix'
+  | 'docusaurus'
   | 'wordpress'
   | 'php-raw'
   | 'html-static'
@@ -41,6 +44,7 @@ export type PriorityTier = 'P0' | 'P1' | 'P2' | 'P3';
 export type EvidenceType = 'confirmed' | 'inferred' | 'recommended';
 export type SearchIntent = 'informational' | 'commercial' | 'transactional' | 'navigational';
 export type ContentGrade = 'excellent' | 'good' | 'needs_improvement' | 'poor' | 'critical';
+export type FunnelStage = 'ToFu (Awareness)' | 'MoFu (Consideration)' | 'BoFu (Decision & Conversion)';
 
 export type AuditDimension =
   | 'seo'
@@ -107,6 +111,9 @@ export interface PageData {
   metaDescription?: string;
   canonical?: string;
   metaRobots?: string;
+  viewport?: string;
+  charset?: string;
+  favicon?: string;
   ogTags: Record<string, string>;
   twitterTags: Record<string, string>;
   headings: ExtractedHeading[];
@@ -144,6 +151,7 @@ export interface ProjectDiscoveryResult {
 export interface DimensionScore {
   score: number;
   grade: 'A+' | 'A' | 'B' | 'C' | 'D' | 'F';
+  weightPercent: number;
   summary: string;
   issuesCount: { critical: number; high: number; medium: number; low: number };
 }
@@ -158,6 +166,55 @@ export interface AuditScores {
   conversion: DimensionScore;
   performance: DimensionScore;
   overall: number;
+}
+
+export interface MarketingAudienceMapping {
+  primaryAudience: string;
+  searchIntent: SearchIntent;
+  funnelStage: FunnelStage;
+  coreCustomerProblem: string;
+  valueProposition: string;
+}
+
+export interface MarketingCROPlan {
+  primaryCtaRecommendation: string;
+  secondaryCtaRecommendation: string;
+  trustSignalsToIntegrate: string[];
+  frictionReductionTactics: string[];
+  riskReversalOffer: string;
+}
+
+export interface MarketingAeoStrategy {
+  targetQuestions: string[];
+  aiOverviewSnippetTemplate: string;
+  faqSchemaTopics: string[];
+  citationOpportunities: string[];
+}
+
+export interface MarketingRoadmap {
+  days1To30: string[];
+  days31To60: string[];
+  days61To90: string[];
+}
+
+export interface MarketingStrategy {
+  timestamp: string;
+  target: string;
+  framework?: FrameworkType;
+  healthScore: number;
+  marketingReadinessGrade: 'A+' | 'A' | 'B' | 'C' | 'D' | 'F';
+  executiveMarketingSummary: string;
+  audienceMapping: MarketingAudienceMapping;
+  croOptimizationPlan: MarketingCROPlan;
+  aeoAiSearchPlaybook: MarketingAeoStrategy;
+  highRoiQuickWins: AuditIssue[];
+  executionRoadmap: MarketingRoadmap;
+  projectedKpiImpact: {
+    organicTrafficGrowth: string;
+    serpClickThroughRate: string;
+    leadConversionRate: string;
+    aiOverviewCitationLikelihood: string;
+  };
 }
 
 export interface AuditReport {
@@ -177,6 +234,7 @@ export interface AuditReport {
     solution: string;
     diffPreview?: string;
   }>;
+  marketingStrategy?: MarketingStrategy;
   implementationPlan: {
     phase1: string[];
     phase2: string[];

@@ -152,6 +152,26 @@ export function auditOnPageSeo(page: PageData): AuditIssue[] {
   }
 
   // 3. Headings Hierarchy (H1-H6)
+  const emptyHeadings = page.headings.filter((h) => !h.text || h.text.trim() === '');
+  if (emptyHeadings.length > 0) {
+    issues.push({
+      id: 'ONPAGE_EMPTY_HEADING',
+      dimension: 'seo',
+      title: `Found ${emptyHeadings.length} Empty Heading Tag(s)`,
+      severity: 'medium',
+      priority: 'P2',
+      priorityScore: 6.0,
+      evidence: `Page contains ${emptyHeadings.length} empty <h1-h6> tags without text content.`,
+      evidenceType: 'confirmed',
+      filePath: page.filePath,
+      whyItMatters: 'Empty heading tags degrade accessibility and dilute content structure signals to search engines.',
+      recommendedSolution: 'Remove empty heading tags or provide meaningful section titles.',
+      implementationApproach: 'Delete unused empty heading tags in template.',
+      expectedImpact: 'Improves accessibility and DOM cleanliness.',
+      effort: 'low'
+    });
+  }
+
   if (page.h1Count === 0) {
     issues.push({
       id: 'ONPAGE_NO_H1',

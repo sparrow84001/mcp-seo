@@ -31,17 +31,26 @@ export async function crawlUrlOrFile(
         headers: {
           'User-Agent':
             'Mozilla/5.0 (compatible; AntigravityGrowthAuditor/1.0; +https://antigravity.google.com/bot)'
-        }
+        },
+        signal: AbortSignal.timeout(10000)
       });
       htmlContent = await response.text();
     } catch (err: any) {
       throw new Error(`Failed to fetch URL ${target}: ${err.message}`);
     }
   } else {
-    if (!fs.existsSync(effectiveFilePath!)) {
-      throw new Error(`File not found: ${effectiveFilePath}`);
+    if (typeof Bun !== 'undefined' && Bun.file) {
+      const fileRef = Bun.file(effectiveFilePath!);
+      if (!(await fileRef.exists())) {
+        throw new Error(`File not found: ${effectiveFilePath}`);
+      }
+      htmlContent = await fileRef.text();
+    } else {
+      if (!fs.existsSync(effectiveFilePath!)) {
+        throw new Error(`File not found: ${effectiveFilePath}`);
+      }
+      htmlContent = fs.readFileSync(effectiveFilePath!, 'utf8');
     }
-    htmlContent = fs.readFileSync(effectiveFilePath!, 'utf8');
   }
 
   const pageType = options?.pageType || classifyPageType(target, effectiveFilePath || target);
@@ -98,11 +107,35 @@ export function extractPageDataFromHtml(
     if (canonicalMatch?.[1]) canonical = canonicalMatch[1];
   }
 
-  // 4. Meta Robots
+  // 4. Meta Robots & Viewport & Charset & Favicon
   const metaRobots: string | undefined =
     $('meta[name="robots"]').attr('content') ||
     $('meta[name="Robots"]').attr('content') ||
     undefined;
+
+  const viewport: string | undefined =
+    $('meta[name="viewport"]').attr('content') ||
+    $('meta[name="Viewport"]').attr('content') ||
+    undefined;
+
+  const charset: string | undefined =
+    $('meta[charset]').attr('charset') ||
+    $('meta[http-equiv="Content-Type"]').attr('content') ||
+    undefined;
+
+  let favicon: string | undefined =
+    $('link[rel="icon"]').attr('href') ||
+    $('link[rel="shortcut icon"]').attr('href') ||
+    $('link[rel="apple-touch-icon"]').attr('href') ||
+    undefined;
+
+  if (!favicon && context.url) {
+    try {
+      favicon = new URL('/favicon.ico', context.url).toString();
+    } catch {
+      favicon = '/favicon.ico';
+    }
+  }
 
   // 5. OpenGraph & Twitter Tags
   const ogTags: Record<string, string> = {};
@@ -159,7 +192,7 @@ export function extractPageDataFromHtml(
         href.startsWith('/') ||
         href.startsWith('./') ||
         href.startsWith('../') ||
-        (context.baseUrl && href.startsWith(context.baseUrl));
+        Boolean(context.baseUrl && href.startsWith(context.baseUrl));
 
       links.push({
         href,
@@ -242,6 +275,9 @@ export function extractPageDataFromHtml(
     metaDescription,
     canonical,
     metaRobots,
+    viewport,
+    charset,
+    favicon,
     ogTags,
     twitterTags,
     headings,

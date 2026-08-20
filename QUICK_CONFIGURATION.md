@@ -2,6 +2,9 @@
 
 This guide shows how to connect and use the **SEO, AEO, GEO & Digital Marketing Audit + Safe Fix MCP Server** with **GitHub Copilot**, **Antigravity 2.0**, **Claude Desktop**, **Cursor**, and **Cline / Roo Code**.
 
+> [!TIP]
+> **Using Standalone `.exe`?** You can replace `"command": "bun", "args": ["d:/.../src/index.ts"]` with `"command": "d:/SNtemp/mcp/mcp-seo/bin/mcp-seo.exe", "args": []` in any client below. For full details, see [EXE_USAGE_GUIDE.md](file:///d:/SNtemp/mcp/mcp-seo/EXE_USAGE_GUIDE.md).
+
 ---
 
 ## 1. Antigravity 2.0 (`agy`)
@@ -158,6 +161,9 @@ bun start
 
 * **AEO & AI Search Check:**
   > "Audit `resources/views/services.blade.php` for Google AI Overviews and Perplexity readiness with `seo_audit_aeo`."
+
+* **Digital Marketing Strategy & Growth Blueprint:**
+  > "Formulate a digital marketing and CRO growth blueprint for this site with `seo_generate_marketing_strategy`."
 
 * **Safe Code Fix Mode:**
   > "Generate a surgical code fix for `app/about/page.tsx` adding Title, Meta Description, and Organization JSON-LD schema using `seo_generate_code_fix`."

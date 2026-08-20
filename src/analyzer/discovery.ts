@@ -7,6 +7,44 @@ import type {
   ProjectDiscoveryResult
 } from '../types/index.ts';
 
+/**
+ * High-performance file scanner leveraging Bun.Glob when running on Bun runtime,
+ * with seamless fallback to fast-glob.
+ */
+export function scanFiles(
+  patterns: string[],
+  options: { cwd: string; ignore?: string[] }
+): string[] {
+  const results = new Set<string>();
+  const ignorePatterns = options.ignore || ['**/node_modules/**', '**/vendor/**', '**/dist/**', '**/.next/**', '**/.git/**'];
+
+  if (typeof Bun !== 'undefined' && (Bun as any).Glob) {
+    try {
+      for (const pattern of patterns) {
+        const glob = new (Bun as any).Glob(pattern);
+        for (const file of glob.scanSync({ cwd: options.cwd, dot: false })) {
+          const normalized = String(file).replace(/\\/g, '/');
+          const isIgnored = ignorePatterns.some((ig) => {
+            const clean = ig.replace(/\*\*/g, '').replace(/\*/g, '').replace(/\//g, '');
+            return normalized.includes(clean);
+          });
+          if (!isIgnored) {
+            results.add(normalized);
+          }
+        }
+      }
+      return Array.from(results);
+    } catch {
+      // Fallback to fast-glob
+    }
+  }
+
+  return fg.sync(patterns, {
+    cwd: options.cwd,
+    ignore: ignorePatterns
+  });
+}
+
 export async function discoverProject(projectPath: string): Promise<ProjectDiscoveryResult> {
   const normalizedPath = path.resolve(projectPath);
   if (!fs.existsSync(normalizedPath)) {
@@ -17,32 +55,32 @@ export async function discoverProject(projectPath: string): Promise<ProjectDisco
   const frameworkInfo = detectFramework(normalizedPath);
 
   // 2. Discover Sitemaps, Robots, LLMs.txt
-  const sitemaps = fg.sync(['**/sitemap*.{xml,ts,js}', '**/sitemap-index.xml'], {
+  const sitemaps = scanFiles(['**/sitemap*.{xml,ts,js}', '**/sitemap-index.xml'], {
     cwd: normalizedPath,
     ignore: ['**/node_modules/**', '**/vendor/**', '**/dist/**', '**/.next/**']
   });
 
-  const robots = fg.sync(['**/robots.{txt,ts,js}'], {
+  const robots = scanFiles(['**/robots.{txt,ts,js}'], {
     cwd: normalizedPath,
     ignore: ['**/node_modules/**', '**/vendor/**', '**/dist/**', '**/.next/**']
   });
 
-  const llms = fg.sync(['**/llms*.txt'], {
+  const llms = scanFiles(['**/llms*.txt'], {
     cwd: normalizedPath,
     ignore: ['**/node_modules/**', '**/vendor/**', '**/dist/**', '**/.next/**']
   });
 
   // 3. Detect Meta Helpers & Layouts
-  const metaHelpers = fg.sync(
+  const metaHelpers = scanFiles(
     [
-      '**/layouts/**/*.{blade.php,tsx,jsx,vue,astro,php}',
+      '**/layouts/**/*.{blade.php,tsx,jsx,vue,astro,svelte,php}',
       '**/app/**/layout.{tsx,jsx,js}',
       '**/pages/_document.{tsx,jsx}',
       '**/pages/_app.{tsx,jsx}',
       '**/includes/header.{php,html}',
-      '**/components/Seo*.{tsx,jsx,vue}',
-      '**/components/Meta*.{tsx,jsx,vue}',
-      '**/components/Head*.{tsx,jsx,vue}'
+      '**/components/Seo*.{tsx,jsx,vue,svelte,astro}',
+      '**/components/Meta*.{tsx,jsx,vue,svelte,astro}',
+      '**/components/Head*.{tsx,jsx,vue,svelte,astro}'
     ],
     {
       cwd: normalizedPath,
@@ -84,7 +122,7 @@ export async function discoverProject(projectPath: string): Promise<ProjectDisco
     pageInventory[r.pageType] = (pageInventory[r.pageType] || 0) + 1;
   }
 
-  const allFiles = fg.sync(['**/*.{php,blade.php,tsx,jsx,vue,astro,html}'], {
+  const allFiles = scanFiles(['**/*.{php,blade.php,tsx,jsx,vue,astro,svelte,html}'], {
     cwd: normalizedPath,
     ignore: ['**/node_modules/**', '**/vendor/**', '**/dist/**', '**/.next/**', '**/.git/**']
   });
@@ -183,6 +221,42 @@ function detectFramework(projectPath: string): {
         };
       }
 
+      // Astro
+      if (deps['astro']) {
+        return {
+          type: 'astro',
+          name: 'Astro',
+          version: deps['astro'],
+          templateEngine: 'Astro components (.astro)',
+          routingModel: 'File-system based (src/pages/**/*.astro)',
+          metaHandler: 'Astro Head components / frontmatter'
+        };
+      }
+
+      // SvelteKit
+      if (deps['@sveltejs/kit']) {
+        return {
+          type: 'sveltekit',
+          name: 'SvelteKit',
+          version: deps['@sveltejs/kit'],
+          templateEngine: 'Svelte Components (.svelte)',
+          routingModel: 'File-system based (src/routes/**/+page.svelte)',
+          metaHandler: '<svelte:head> component'
+        };
+      }
+
+      // Remix
+      if (deps['@remix-run/react'] || deps['@remix-run/node']) {
+        return {
+          type: 'remix',
+          name: 'Remix',
+          version: deps['@remix-run/react'],
+          templateEngine: 'React Components (TSX/JSX)',
+          routingModel: 'File-system based (app/routes/**/*.tsx)',
+          metaHandler: 'export const meta: MetaFunction'
+        };
+      }
+
       // Nuxt
       if (deps['nuxt'] || deps['nuxt3']) {
         return {
@@ -195,15 +269,15 @@ function detectFramework(projectPath: string): {
         };
       }
 
-      // Astro
-      if (deps['astro']) {
+      // Docusaurus
+      if (deps['@docusaurus/core']) {
         return {
-          type: 'astro',
-          name: 'Astro',
-          version: deps['astro'],
-          templateEngine: 'Astro components (.astro)',
-          routingModel: 'File-system based (src/pages/**/*.astro)',
-          metaHandler: 'Astro Head components'
+          type: 'docusaurus',
+          name: 'Docusaurus',
+          version: deps['@docusaurus/core'],
+          templateEngine: 'React + Markdown (.md, .mdx)',
+          routingModel: 'File-system docs/pages',
+          metaHandler: '<Head> component & frontmatter'
         };
       }
 
@@ -247,7 +321,7 @@ function detectFramework(projectPath: string): {
   }
 
   // Raw PHP
-  const phpFiles = fg.sync(['**/*.php'], {
+  const phpFiles = scanFiles(['**/*.php'], {
     cwd: projectPath,
     ignore: ['**/node_modules/**', '**/vendor/**']
   });
@@ -262,7 +336,7 @@ function detectFramework(projectPath: string): {
   }
 
   // Static HTML
-  const htmlFiles = fg.sync(['**/*.html'], {
+  const htmlFiles = scanFiles(['**/*.html'], {
     cwd: projectPath,
     ignore: ['**/node_modules/**', '**/vendor/**', '**/dist/**']
   });
@@ -292,7 +366,7 @@ function detectRoutes(
 
   if (framework === 'laravel') {
     // Check Blade views
-    const viewFiles = fg.sync(['resources/views/**/*.{blade.php,php}'], {
+    const viewFiles = scanFiles(['resources/views/**/*.{blade.php,php}'], {
       cwd: projectPath
     });
 
@@ -307,7 +381,7 @@ function detectRoutes(
       routes.push({ path: urlPath, filePath: path.join(projectPath, view), pageType });
     }
   } else if (framework === 'nextjs-app') {
-    const pageFiles = fg.sync(['{app,src/app}/**/page.{tsx,jsx,js}'], {
+    const pageFiles = scanFiles(['{app,src/app}/**/page.{tsx,jsx,js}'], {
       cwd: projectPath
     });
 
@@ -321,7 +395,7 @@ function detectRoutes(
       routes.push({ path: routePath, filePath: path.join(projectPath, file), pageType });
     }
   } else if (framework === 'nextjs-pages') {
-    const pageFiles = fg.sync(['{pages,src/pages}/**/*.{tsx,jsx,js}'], {
+    const pageFiles = scanFiles(['{pages,src/pages}/**/*.{tsx,jsx,js}'], {
       cwd: projectPath,
       ignore: ['**/_app.*', '**/_document.*', '**/api/**']
     });
@@ -335,9 +409,34 @@ function detectRoutes(
       const pageType = classifyPageType(routePath, file);
       routes.push({ path: routePath, filePath: path.join(projectPath, file), pageType });
     }
+  } else if (framework === 'astro') {
+    const astroFiles = scanFiles(['{src/pages,pages}/**/*.{astro,md,mdx}'], {
+      cwd: projectPath
+    });
+    for (const file of astroFiles) {
+      let routePath = file
+        .replace(/^(src\/pages|pages)/, '')
+        .replace(/\.(astro|md|mdx)$/, '')
+        .replace(/\/index$/, '');
+      if (!routePath || routePath === '') routePath = '/';
+      const pageType = classifyPageType(routePath, file);
+      routes.push({ path: routePath, filePath: path.join(projectPath, file), pageType });
+    }
+  } else if (framework === 'sveltekit') {
+    const svelteFiles = scanFiles(['src/routes/**/+page.svelte'], {
+      cwd: projectPath
+    });
+    for (const file of svelteFiles) {
+      let routePath = file
+        .replace(/^src\/routes/, '')
+        .replace(/\/+page\.svelte$/, '');
+      if (!routePath || routePath === '') routePath = '/';
+      const pageType = classifyPageType(routePath, file);
+      routes.push({ path: routePath, filePath: path.join(projectPath, file), pageType });
+    }
   } else {
     // Generic HTML / PHP
-    const files = fg.sync(['**/*.{html,php}'], {
+    const files = scanFiles(['**/*.{html,php}'], {
       cwd: projectPath,
       ignore: ['**/node_modules/**', '**/vendor/**', '**/dist/**', '**/includes/**']
     });

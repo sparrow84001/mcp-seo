@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    // Environment setup & latest features
+    // Environment setup & TypeScript 7 / ESNext latest features
     "lib": ["ESNext"],
     "target": "ESNext",
     "module": "Preserve",
@@ -15,16 +15,20 @@
     "verbatimModuleSyntax": true,
     "noEmit": true,
 
-    // Best practices
+    // TypeScript 7 Strictness & Best Practices
     "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "useUnknownInCatchVariables": true,
     "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
-
-    // Some stricter flags (disabled by default)
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noPropertyAccessFromIndexSignature": false
+    "isolatedModules": true
   }
 }

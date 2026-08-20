@@ -8,6 +8,7 @@ import type {
   PageData,
   ProjectDiscoveryResult
 } from '../types/index.ts';
+import { generateMarketingStrategy } from './strategy.ts';
 
 export function generateAuditReport(
   target: string,
@@ -36,23 +37,35 @@ export function generateAuditReport(
     }
   }
 
-  // 2. Compute Scores for each Dimension
+  // 2. Compute Weighted Scores for each Dimension
+  const dimensionWeights: Record<AuditDimension, number> = {
+    technical: 20,
+    seo: 15,
+    aeo: 15,
+    geo: 10,
+    local: 10,
+    content: 10,
+    conversion: 10,
+    performance: 10
+  };
+
   const dimensions: AuditDimension[] = [
+    'technical',
     'seo',
     'aeo',
     'geo',
     'local',
     'content',
-    'technical',
     'conversion',
     'performance'
   ];
 
   const scoresRecord: Partial<Record<AuditDimension, DimensionScore>> = {};
-  let totalScoreSum = 0;
+  let weightedScoreSum = 0;
 
   for (const dim of dimensions) {
     const list = issuesByDimension[dim];
+    const weight = dimensionWeights[dim] || 10;
     const counts = {
       critical: list.filter((i) => i.severity === 'critical').length,
       high: list.filter((i) => i.severity === 'high').length,
@@ -62,7 +75,7 @@ export function generateAuditReport(
 
     let deductions = counts.critical * 30 + counts.high * 15 + counts.medium * 7 + counts.low * 3;
     let score = Math.max(0, 100 - deductions);
-    totalScoreSum += score;
+    weightedScoreSum += (score * weight) / 100;
 
     let grade: 'A+' | 'A' | 'B' | 'C' | 'D' | 'F' = 'A+';
     if (score >= 95) grade = 'A+';
@@ -75,12 +88,13 @@ export function generateAuditReport(
     scoresRecord[dim] = {
       score,
       grade,
+      weightPercent: weight,
       summary: `${counts.critical} Critical, ${counts.high} High, ${counts.medium} Med, ${counts.low} Low issue(s)`,
       issuesCount: counts
     };
   }
 
-  const overall = Math.round(totalScoreSum / dimensions.length);
+  const overall = Math.round(weightedScoreSum);
 
   const scores: AuditScores = {
     seo: scoresRecord.seo!,
@@ -126,7 +140,10 @@ export function generateAuditReport(
     diffPreview: issue.implementationApproach
   }));
 
-  // 7. 5-Phase Implementation Plan
+  // 7. Generate Integrated Digital Marketing Strategy
+  const marketingStrategy = generateMarketingStrategy(target, pageData, allIssues, discovery);
+
+  // 8. 5-Phase Implementation Plan
   const phase1: string[] = [];
   const phase2: string[] = [];
   const phase3: string[] = [];
@@ -150,13 +167,13 @@ export function generateAuditReport(
     }
   }
 
-  // 8. Executive Summary
-  const executiveSummary = `Comprehensive audit completed for ${target}. Overall Health Score: ${overall}/100 across 8 growth dimensions. Identified ${allIssues.length} actionable items (${criticalProblems.length} critical, ${quickWins.length} high-impact quick wins). Framework: ${framework || 'Standard HTML/Web'}.`;
+  // 9. Executive Summary
+  const executiveSummary = `Comprehensive audit completed for ${target}. Overall Health Score: ${overall}/100 across 8 weighted growth dimensions. Identified ${allIssues.length} actionable items (${criticalProblems.length} critical, ${quickWins.length} high-impact quick wins). Marketing readiness grade: ${marketingStrategy.marketingReadinessGrade}. Detected framework: ${framework || discovery?.framework || 'Standard HTML/Web'}.`;
 
   return {
     timestamp: new Date().toISOString(),
     projectOrUrl: target,
-    framework,
+    framework: framework || discovery?.framework,
     scores,
     executiveSummary,
     criticalProblems,
@@ -164,6 +181,7 @@ export function generateAuditReport(
     issuesByDimension,
     codeProblems,
     recommendedFixes,
+    marketingStrategy,
     implementationPlan: {
       phase1: phase1.slice(0, 5),
       phase2: phase2.slice(0, 5),
@@ -175,6 +193,7 @@ export function generateAuditReport(
 }
 
 export function formatReportToMarkdown(report: AuditReport): string {
+  const mkt = report.marketingStrategy;
   return `# SEO, AEO, GEO & Digital Marketing Audit Report
 
 **Target:** \`${report.projectOrUrl}\`  
@@ -188,19 +207,34 @@ ${report.executiveSummary}
 
 ---
 
-## Overall Scorecard
+## 8-Dimension Growth Scorecard (Weighted)
 
-| Dimension | Score | Grade | Status |
-| :--- | :---: | :---: | :--- |
-| **Overall Health** | **${report.scores.overall}/100** | - | ${report.scores.overall >= 80 ? '🟢 Strong' : report.scores.overall >= 60 ? '🟡 Moderate' : '🔴 Needs Urgent Attention'} |
-| **Technical SEO** | ${report.scores.technical.score}/100 | \`${report.scores.technical.grade}\` | ${report.scores.technical.summary} |
-| **On-Page SEO** | ${report.scores.seo.score}/100 | \`${report.scores.seo.grade}\` | ${report.scores.seo.summary} |
-| **AEO (Answer Engine Optimization)** | ${report.scores.aeo.score}/100 | \`${report.scores.aeo.grade}\` | ${report.scores.aeo.summary} |
-| **GEO (Generative Engine Optimization)** | ${report.scores.geo.score}/100 | \`${report.scores.geo.grade}\` | ${report.scores.geo.summary} |
-| **Local / Area SEO** | ${report.scores.local.score}/100 | \`${report.scores.local.grade}\` | ${report.scores.local.summary} |
-| **Content Quality & Intent** | ${report.scores.content.score}/100 | \`${report.scores.content.grade}\` | ${report.scores.content.summary} |
-| **Conversion & Marketing** | ${report.scores.conversion.score}/100 | \`${report.scores.conversion.grade}\` | ${report.scores.conversion.summary} |
-| **Code Performance / CWV Risks** | ${report.scores.performance.score}/100 | \`${report.scores.performance.grade}\` | ${report.scores.performance.summary} |
+| Dimension | Weight | Score | Grade | Status |
+| :--- | :---: | :---: | :---: | :--- |
+| **Overall Health** | **100%** | **${report.scores.overall}/100** | - | ${report.scores.overall >= 80 ? '🟢 Strong' : report.scores.overall >= 60 ? '🟡 Moderate' : '🔴 Needs Urgent Attention'} |
+| **Technical SEO** | 20% | ${report.scores.technical.score}/100 | \`${report.scores.technical.grade}\` | ${report.scores.technical.summary} |
+| **On-Page SEO** | 15% | ${report.scores.seo.score}/100 | \`${report.scores.seo.grade}\` | ${report.scores.seo.summary} |
+| **AEO (Answer Engine Optimization)** | 15% | ${report.scores.aeo.score}/100 | \`${report.scores.aeo.grade}\` | ${report.scores.aeo.summary} |
+| **GEO (Generative Engine Optimization)** | 10% | ${report.scores.geo.score}/100 | \`${report.scores.geo.grade}\` | ${report.scores.geo.summary} |
+| **Local / Area SEO** | 10% | ${report.scores.local.score}/100 | \`${report.scores.local.grade}\` | ${report.scores.local.summary} |
+| **Content Quality & Intent** | 10% | ${report.scores.content.score}/100 | \`${report.scores.content.grade}\` | ${report.scores.content.summary} |
+| **Conversion & Marketing (CRO)** | 10% | ${report.scores.conversion.score}/100 | \`${report.scores.conversion.grade}\` | ${report.scores.conversion.summary} |
+| **Code Performance / CWV Risks** | 10% | ${report.scores.performance.score}/100 | \`${report.scores.performance.grade}\` | ${report.scores.performance.summary} |
+
+${
+  mkt
+    ? `---
+
+## Digital Marketing & Search Strategy Blueprint
+
+* **Funnel Stage:** **${mkt.audienceMapping.funnelStage}** (Search Intent: \`${mkt.audienceMapping.searchIntent.toUpperCase()}\`)
+* **Primary Conversion CTA:** \`${mkt.croOptimizationPlan.primaryCtaRecommendation}\`
+* **Risk-Reversal Offer:** *${mkt.croOptimizationPlan.riskReversalOffer}*
+* **Target Questions for AI Overviews:**
+${mkt.aeoAiSearchPlaybook.targetQuestions.map((q) => `  - ❓ "${q}"`).join('\n')}
+`
+    : ''
+}
 
 ---
 

@@ -57,9 +57,15 @@ bun test
 # Build executable bundle
 bun run build
 
+# Compile standalone native binary (zero dependencies)
+bun run compile
+
 # Start MCP server directly
 bun start
 ```
+
+> [!TIP]
+> **Standalone Executable Available:** You can compile a single standalone `.exe` using `bun run compile` which runs without requiring Bun or Node.js on the host machine. See [EXE_USAGE_GUIDE.md](file:///d:/SNtemp/mcp/mcp-seo/EXE_USAGE_GUIDE.md) for setup instructions.
 
 ---
 
@@ -152,8 +158,9 @@ Add to `.cursor/mcp.json` in your project root:
 | `seo_audit_performance`| Identifies code-level CLS (missing img dimensions), LCP (legacy formats), blocking JS | `target` |
 | `seo_audit_schema` | Validates Schema.org JSON-LD syntax and missing schemas by page type | `target` |
 | `seo_audit_internal_links` | Builds link graph, detects orphan pages, generic anchor text, suggests contextual links | `target` |
-| `seo_generate_full_audit` | Consolidates all 8 dimensions into 0-100 scores, P0-P3 matrix, and Markdown report | `target`, `projectPath?` |
-| `seo_generate_code_fix` | Framework-aware code generation (Laravel Blade, Next.js, HTML) with unified diff | `filePath`, `title?`, `metaDescription?`, `canonicalUrl?`, `jsonLdSchema?`, `applyDirectly?` |
+| `seo_generate_full_audit` | Consolidates all 8 dimensions into weighted 0-100 scores, P0-P3 matrix, and Markdown report | `target`, `projectPath?` |
+| `seo_generate_marketing_strategy` | Formulates high-ROI digital marketing growth blueprint, CRO plan, AEO strategy & 30-60-90 day roadmap | `target`, `projectPath?` |
+| `seo_generate_code_fix` | Framework-aware code generation (Laravel Blade, Next.js, Astro, HTML) with unified diff | `filePath`, `title?`, `metaDescription?`, `canonicalUrl?`, `jsonLdSchema?`, `applyDirectly?` |
 | `seo_validate_code_fix` | Post-fix validation: checks duplicate tags, JSON-LD syntax, Before/After score diff | `filePath`, `beforeScores?` |
 
 ---
@@ -161,9 +168,10 @@ Add to `.cursor/mcp.json` in your project root:
 ## MCP Prompts Reference
 
 1. **`seo_full_audit`**: Guides the AI through the complete 12-step audit workflow from discovery to reporting.
-2. **`seo_code_fix_workflow`**: Step-by-step guidance for surgical code fixes with approval checkpoints.
-3. **`aeo_geo_optimization`**: Deep optimization for Generative Engines and AI Answer Engines.
-4. **`local_seo_boost`**: Dedicated optimization for local and multi-location businesses.
+2. **`digital_marketing_growth_strategy`**: Synthesizes audit findings into a high-impact digital marketing growth blueprint with CRO levers, AI answer engine tactics, audience mapping, and a 30-60-90 day execution roadmap.
+3. **`seo_code_fix_workflow`**: Step-by-step guidance for surgical code fixes with approval checkpoints.
+4. **`aeo_geo_optimization`**: Deep optimization for Generative Engines and AI Answer Engines.
+5. **`local_seo_boost`**: Dedicated optimization for local and multi-location businesses.
 
 ---
 

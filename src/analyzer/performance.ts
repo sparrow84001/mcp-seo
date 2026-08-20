@@ -82,5 +82,27 @@ export function auditPerformanceRisks(page: PageData): AuditIssue[] {
     });
   }
 
+  // 4. LCP Anti-Pattern: Lazy Loading on First / Hero Image
+  const firstImage = page.images[0];
+  if (firstImage && firstImage.loading === 'lazy') {
+    issues.push({
+      id: 'PERF_LCP_HERO_LAZY_LOAD',
+      dimension: 'performance',
+      title: 'LCP Anti-Pattern: loading="lazy" on Primary Hero Image',
+      severity: 'medium',
+      priority: 'P2',
+      priorityScore: 6.5,
+      evidence: `First image (${firstImage.src}) has loading="lazy", which delays Largest Contentful Paint.`,
+      evidenceType: 'confirmed',
+      filePath: page.filePath,
+      whyItMatters:
+        'Applying loading="lazy" to the hero image prevents the browser from immediately prioritizing its download, degrading LCP by hundreds of milliseconds.',
+      recommendedSolution: 'Remove loading="lazy" on the primary hero image and consider adding fetchpriority="high".',
+      implementationApproach: 'Update primary <img> to fetchpriority="high" and remove loading="lazy".',
+      expectedImpact: 'Significantly improves Largest Contentful Paint (LCP) time.',
+      effort: 'low'
+    });
+  }
+
   return issues;
 }

@@ -54,6 +54,24 @@ export function auditTechnicalSeo(
         expectedImpact: 'Ensures correct page indexation and prevents accidental de-indexing.',
         effort: 'low'
       });
+    } else if (page.url !== page.canonical) {
+      // Trailing slash discrepancy
+      issues.push({
+        id: 'TECH_CANONICAL_TRAILING_SLASH',
+        dimension: 'technical',
+        title: 'Trailing Slash Discrepancy Between Canonical and URL',
+        severity: 'low',
+        priority: 'P3',
+        priorityScore: 4.5,
+        evidence: `URL has ${page.url.endsWith('/') ? 'trailing slash' : 'no trailing slash'} while canonical is ${page.canonical}`,
+        evidenceType: 'confirmed',
+        filePath: page.filePath,
+        whyItMatters: 'Inconsistent trailing slashes cause unnecessary redirect hops or duplicate URL indexing.',
+        recommendedSolution: 'Standardize trailing slash policy across site routing and canonical links.',
+        implementationApproach: 'Standardize URL generation helper in routing config.',
+        expectedImpact: 'Consolidates indexing signals and eliminates redirect hops.',
+        effort: 'low'
+      });
     }
   }
 
@@ -102,7 +120,7 @@ export function auditTechnicalSeo(
     }
   }
 
-  // 3. Robots.txt and Sitemap Discovery Checks
+  // 3. Robots.txt, Sitemap and LLMs.txt Discovery Checks
   if (discovery) {
     if (discovery.robotsTxtFiles.length === 0) {
       issues.push({
@@ -186,6 +204,51 @@ export function auditTechnicalSeo(
       recommendedSolution: 'Upgrade all asset and link protocols to HTTPS or protocol-relative/relative paths.',
       implementationApproach: 'Replace http:// with https:// or relative paths in templates.',
       expectedImpact: 'Eliminates mixed content warnings and improves SSL security ranking signals.',
+      effort: 'low'
+    });
+  }
+
+  // 5. Mobile Viewport Meta Tag Check
+  const rawHtml = page.rawHtml || '';
+  const hasViewport = Boolean(page.viewport) || /name=["']viewport["']/i.test(rawHtml);
+  if (!hasViewport && (page.filePath?.endsWith('.html') || page.filePath?.includes('layout') || page.url)) {
+    issues.push({
+      id: 'TECH_NO_VIEWPORT',
+      dimension: 'technical',
+      title: 'Missing Mobile Viewport Meta Tag',
+      severity: 'high',
+      priority: 'P1',
+      priorityScore: 8.0,
+      evidence: 'No <meta name="viewport" content="..."> tag detected in head.',
+      evidenceType: 'confirmed',
+      filePath: page.filePath,
+      whyItMatters:
+        'Without a mobile viewport tag, mobile devices render pages at desktop width, causing severe mobile usability failures in Google Mobile-First indexing.',
+      recommendedSolution: 'Add <meta name="viewport" content="width=device-width, initial-scale=1.0"> inside <head>.',
+      implementationApproach: 'Insert standard viewport meta tag in master HTML/layout head.',
+      expectedImpact: 'Ensures mobile-first indexing compliance and responsive rendering.',
+      effort: 'low'
+    });
+  }
+
+  // 6. Charset Declaration Check
+  const hasCharset = Boolean(page.charset) || /charset=["']?utf-8["']?/i.test(rawHtml);
+  if (!hasCharset && (page.filePath?.endsWith('.html') || page.filePath?.includes('layout') || page.url)) {
+    issues.push({
+      id: 'TECH_NO_CHARSET',
+      dimension: 'technical',
+      title: 'Missing UTF-8 Character Encoding Meta Tag',
+      severity: 'low',
+      priority: 'P3',
+      priorityScore: 4.0,
+      evidence: 'No <meta charset="utf-8"> tag found at top of <head>.',
+      evidenceType: 'confirmed',
+      filePath: page.filePath,
+      whyItMatters:
+        'Early character encoding declaration prevents XSS vulnerabilities and ensures text/emojis render accurately across all browsers.',
+      recommendedSolution: 'Add <meta charset="utf-8"> as the very first element inside <head>.',
+      implementationApproach: 'Insert <meta charset="utf-8"> right after <head>.',
+      expectedImpact: 'Guarantees reliable character rendering and HTML5 compliance.',
       effort: 'low'
     });
   }

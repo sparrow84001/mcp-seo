@@ -39,7 +39,10 @@ describe('Audit Analyzer Suite', () => {
     const report = generateAuditReport('https://example.com', page, allIssues);
 
     expect(report.scores.seo.score).toBeLessThan(60);
+    expect(report.scores.technical.weightPercent).toBe(20);
     expect(report.criticalProblems.length).toBeGreaterThan(0);
+    expect(report.marketingStrategy).toBeDefined();
+    expect(report.marketingStrategy?.audienceMapping.searchIntent).toBeDefined();
     expect(report.implementationPlan.phase1.length).toBeGreaterThan(0);
   });
 });
