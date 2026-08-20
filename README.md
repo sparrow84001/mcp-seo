@@ -1,5 +1,6 @@
 # SEO, AEO, GEO & Digital Marketing Audit + Safe Fix MCP Server
 
+[![CI & PR Validation](https://github.com/sparrow84001/mcp-seo/actions/workflows/ci.yml/badge.svg)](https://github.com/sparrow84001/mcp-seo/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/sparrow84001/mcp-seo)
 [![TypeScript](https://img.shields.io/badge/TypeScript-7.0.2-blue.svg)](https://www.typescriptlang.org/)
 [![Bun](https://img.shields.io/badge/Bun-1.4.0-black.svg)](https://bun.sh)
