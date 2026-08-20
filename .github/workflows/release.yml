@@ -69,3 +69,22 @@ jobs:
         with:
           files: release-artifacts/**/*
           generate_release_notes: true
+
+  publish-mcp-registry:
+    name: Auto-Publish to Official MCP Registry
+    needs: create-release
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install mcp-publisher
+        run: |
+          curl -L "https://github.com/modelcontextprotocol/registry/releases/download/v1.8.1/mcp-publisher_linux_amd64.tar.gz" | tar xz mcp-publisher
+
+      - name: Authenticate via GitHub OIDC
+        run: ./mcp-publisher login github-oidc
+
+      - name: Publish to Official MCP Registry
+        run: ./mcp-publisher publish
