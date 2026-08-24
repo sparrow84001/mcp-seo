@@ -107,4 +107,4 @@ jobs:
           bun-version: latest
 
       - name: Trigger Smithery Indexer
-        run: bunx @smithery/cli mcp publish https://github.com/sparrow84001/mcp-seo -n sparrow8400/mcp-seo
+        run: bunx @smithery/cli mcp publish https://mcp-seo-5dl7.onrender.com -n sparrow8400/mcp-seo
