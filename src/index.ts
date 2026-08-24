@@ -672,6 +672,46 @@ function startHttpServer(port: number = 3000, host: string = '0.0.0.0') {
       return;
     }
 
+    if (url.pathname === '/.well-known/mcp/server-card.json') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        serverInfo: {
+          name: 'mcp-seo',
+          version: '1.0.3',
+          description: 'SEO, AEO, GEO, Local SEO & CRO Growth Auditor + Safe Code Fixer'
+        },
+        authentication: { required: false },
+        tools: [
+          {
+            name: 'seo_discover_project',
+            description: 'Discovers website framework, routes, sitemaps, robots, llms.txt and page inventory.',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                projectPath: { type: 'string' }
+              },
+              required: ['projectPath']
+            }
+          },
+          {
+            name: 'seo_crawl_and_extract',
+            description: 'Crawls a live URL or reads a local file to extract SEO signals and page metadata.',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                target: { type: 'string' },
+                pageType: { type: 'string' }
+              },
+              required: ['target']
+            }
+          }
+        ],
+        resources: [],
+        prompts: []
+      }));
+      return;
+    }
+
     if (
       url.pathname === '/mcp' ||
       url.pathname === '/sse' ||
