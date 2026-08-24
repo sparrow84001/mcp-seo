@@ -37,6 +37,7 @@ jobs:
         run: bun run build
 
       - name: Compile Standalone Native Executable
+        shell: bash
         run: |
           mkdir -p bin
           bun run compile
