@@ -28,7 +28,7 @@ import type { AuditIssue, ProjectDiscoveryResult } from './types/index.ts';
 // Initialize McpServer
 const server = new McpServer({
   name: 'mcp-seo',
-  version: '1.0.1'
+  version: '1.0.3'
 });
 
 // ==========================================
@@ -652,7 +652,7 @@ function startHttpServer(port: number = 3000, host: string = '0.0.0.0') {
 
     if (url.pathname === '/health') {
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ status: 'ok', uptime: process.uptime(), version: '1.0.1' }));
+      res.end(JSON.stringify({ status: 'ok', uptime: process.uptime(), version: '1.0.3' }));
       return;
     }
 
@@ -661,7 +661,7 @@ function startHttpServer(port: number = 3000, host: string = '0.0.0.0') {
       res.end(
         JSON.stringify({
           name: 'io.github.sparrow84001/mcp-seo',
-          version: '1.0.1',
+          version: '1.0.3',
           author: 'Sayanta Neogi',
           description: 'SEO, AEO, GEO, Local SEO & CRO Growth Auditor + Safe Code Fixer',
           transport: 'streamable-http',

@@ -1,7 +1,7 @@
 # SEO, AEO, GEO & Digital Marketing Audit + Safe Fix MCP Server
 
 [![CI & PR Validation](https://github.com/sparrow84001/mcp-seo/actions/workflows/ci.yml/badge.svg)](https://github.com/sparrow84001/mcp-seo/actions/workflows/ci.yml)
-[![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)](https://github.com/sparrow84001/mcp-seo)
+[![Version](https://img.shields.io/badge/version-1.0.3-blue.svg)](https://github.com/sparrow84001/mcp-seo)
 [![TypeScript](https://img.shields.io/badge/TypeScript-7.0.2-blue.svg)](https://www.typescriptlang.org/)
 [![Bun](https://img.shields.io/badge/Bun-1.4.0-black.svg)](https://bun.sh)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
@@ -10,7 +10,7 @@
 An advanced, AI-powered Model Context Protocol (MCP) server that acts as a comprehensive **Growth Auditor, Search & AI Engine Optimizer, and Framework-Aware Code Fixer**.
 
 > **Developed by:** **Sayanta Neogi** ([@sparrow84001](https://github.com/sparrow84001)) • 📧 [sparrow8400@gmail.com](mailto:sparrow8400@gmail.com)  
-> **Repository:** [github.com/sparrow84001/mcp-seo](https://github.com/sparrow84001/mcp-seo) • **Version:** `1.0.1`
+> **Repository:** [github.com/sparrow84001/mcp-seo](https://github.com/sparrow84001/mcp-seo) • **Version:** `1.0.3`
 
 Designed for seamless integration with **Antigravity 2.0**, **GitHub Copilot**, **Claude Desktop**, **Cursor**, and **Windsurf**. Built with **TypeScript 7** and powered by **Bun 1.4**.
 
@@ -234,7 +234,7 @@ This server is packaged and ready for the **Official Model Context Protocol Regi
 * **GitHub Profile:** [@sparrow84001](https://github.com/sparrow84001)
 * **Email:** [sparrow8400@gmail.com](mailto:sparrow8400@gmail.com)
 * **Project Repository:** [https://github.com/sparrow84001/mcp-seo](https://github.com/sparrow84001/mcp-seo)
-* **Current Version:** `1.0.1`
+* **Current Version:** `1.0.3`
 
 ---
 
