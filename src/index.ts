@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
 import http from 'node:http';
+import { randomUUID } from 'node:crypto';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
@@ -631,7 +632,7 @@ function getLandingPageHtml(port: number): string {
 
 function startHttpServer(port: number = 3000, host: string = '0.0.0.0') {
   const streamableTransport = new StreamableHTTPServerTransport({
-    sessionIdGenerator: undefined
+    sessionIdGenerator: () => randomUUID()
   });
 
   server.connect(streamableTransport);
@@ -639,7 +640,8 @@ function startHttpServer(port: number = 3000, host: string = '0.0.0.0') {
   const httpServer = http.createServer(async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-session-id');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-session-id, mcp-session-id');
+    res.setHeader('Access-Control-Expose-Headers', 'mcp-session-id, x-session-id');
 
     if (req.method === 'OPTIONS') {
       res.writeHead(200);
