@@ -37,7 +37,9 @@ jobs:
         run: bun run build
 
       - name: Compile Standalone Native Executable
-        run: bun run compile
+        run: |
+          mkdir -p bin
+          bun run compile
 
   mcp-registry-validation:
     name: Validate MCP Registry Manifest (server.json)
