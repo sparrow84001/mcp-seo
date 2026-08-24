@@ -58,5 +58,17 @@ export const MCP_PROMPTS = {
         required: true
       }
     ]
+  },
+  related_ecosystem_and_competitor_analysis: {
+    name: 'related_ecosystem_and_competitor_analysis',
+    description: 'Analyze industry vertical, infer competitor archetypes, identify high-authority backlink/directory targets, and build keyword topic clusters for a project.',
+    arguments: [
+      {
+        name: 'target',
+        description: 'Directory path to the website codebase or a live URL (https://...) to analyze.',
+        required: true
+      }
+    ]
   }
 };
+

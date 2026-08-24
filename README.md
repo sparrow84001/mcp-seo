@@ -1,7 +1,7 @@
 # SEO, AEO, GEO & Digital Marketing Audit + Safe Fix MCP Server
 
 [![CI & PR Validation](https://github.com/sparrow84001/mcp-seo/actions/workflows/ci.yml/badge.svg)](https://github.com/sparrow84001/mcp-seo/actions/workflows/ci.yml)
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/sparrow84001/mcp-seo)
+[![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)](https://github.com/sparrow84001/mcp-seo)
 [![TypeScript](https://img.shields.io/badge/TypeScript-7.0.2-blue.svg)](https://www.typescriptlang.org/)
 [![Bun](https://img.shields.io/badge/Bun-1.4.0-black.svg)](https://bun.sh)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
@@ -10,7 +10,7 @@
 An advanced, AI-powered Model Context Protocol (MCP) server that acts as a comprehensive **Growth Auditor, Search & AI Engine Optimizer, and Framework-Aware Code Fixer**.
 
 > **Developed by:** **Sayanta Neogi** ([@sparrow84001](https://github.com/sparrow84001)) • 📧 [sparrow8400@gmail.com](mailto:sparrow8400@gmail.com)  
-> **Repository:** [github.com/sparrow84001/mcp-seo](https://github.com/sparrow84001/mcp-seo) • **Version:** `1.0.0`
+> **Repository:** [github.com/sparrow84001/mcp-seo](https://github.com/sparrow84001/mcp-seo) • **Version:** `1.0.1`
 
 Designed for seamless integration with **Antigravity 2.0**, **GitHub Copilot**, **Claude Desktop**, **Cursor**, and **Windsurf**. Built with **TypeScript 7** and powered by **Bun 1.4**.
 
@@ -169,9 +169,31 @@ Add to `.cursor/mcp.json` in your project root:
 | `seo_audit_schema` | Validates Schema.org JSON-LD syntax and missing schemas by page type | `target` |
 | `seo_audit_internal_links` | Builds link graph, detects orphan pages, generic anchor text, suggests contextual links | `target` |
 | `seo_generate_full_audit` | Consolidates all 8 dimensions into weighted 0-100 scores, P0-P3 matrix, and Markdown report | `target`, `projectPath?` |
+| `seo_suggest_related_ecosystem` | Discovers related website ecosystems, infers market niche, benchmark competitors, directory/citation targets & keyword clusters | `target` |
 | `seo_generate_marketing_strategy` | Formulates high-ROI digital marketing growth blueprint, CRO plan, AEO strategy & 30-60-90 day roadmap | `target`, `projectPath?` |
 | `seo_generate_code_fix` | Framework-aware code generation (Laravel Blade, Next.js, Astro, HTML) with unified diff | `filePath`, `title?`, `metaDescription?`, `canonicalUrl?`, `jsonLdSchema?`, `applyDirectly?` |
 | `seo_validate_code_fix` | Post-fix validation: checks duplicate tags, JSON-LD syntax, Before/After score diff | `filePath`, `beforeScores?` |
+
+---
+
+## 🌐 Web MCP (HTTP & SSE Stream Server)
+
+In addition to standard CLI stdio mode, MCP-SEO can be run as a **live Web MCP Server** over HTTP/SSE for remote AI clients, cloud hosting, and web dashboards:
+
+```bash
+# Start Web MCP Server (default port: 3000)
+bun run start:http
+
+# Custom port and host
+bun run src/index.ts --http --port 8080 --host 0.0.0.0
+```
+
+* **SSE Stream:** `GET http://localhost:3000/sse`
+* **JSON-RPC Message:** `POST http://localhost:3000/message?sessionId=<id>`
+* **Health Check:** `GET http://localhost:3000/health`
+* **Status Dashboard:** `http://localhost:3000/`
+
+👉 See full guide: **[WEB_MCP_GUIDE.md](./WEB_MCP_GUIDE.md)** for Railway, Render, Fly.io, and Docker deployment.
 
 ---
 
@@ -179,9 +201,10 @@ Add to `.cursor/mcp.json` in your project root:
 
 1. **`seo_full_audit`**: Guides the AI through the complete 12-step audit workflow from discovery to reporting.
 2. **`digital_marketing_growth_strategy`**: Synthesizes audit findings into a high-impact digital marketing growth blueprint with CRO levers, AI answer engine tactics, audience mapping, and a 30-60-90 day execution roadmap.
-3. **`seo_code_fix_workflow`**: Step-by-step guidance for surgical code fixes with approval checkpoints.
-4. **`aeo_geo_optimization`**: Deep optimization for Generative Engines and AI Answer Engines.
-5. **`local_seo_boost`**: Dedicated optimization for local and multi-location businesses.
+3. **`related_ecosystem_and_competitor_analysis`**: Analyzes market vertical, competitor benchmarks, directory backlink prospects, and keyword topic clusters.
+4. **`seo_code_fix_workflow`**: Step-by-step guidance for surgical code fixes with approval checkpoints.
+5. **`aeo_geo_optimization`**: Deep optimization for Generative Engines and AI Answer Engines.
+6. **`local_seo_boost`**: Dedicated optimization for local and multi-location businesses.
 
 ---
 
@@ -211,7 +234,7 @@ This server is packaged and ready for the **Official Model Context Protocol Regi
 * **GitHub Profile:** [@sparrow84001](https://github.com/sparrow84001)
 * **Email:** [sparrow8400@gmail.com](mailto:sparrow8400@gmail.com)
 * **Project Repository:** [https://github.com/sparrow84001/mcp-seo](https://github.com/sparrow84001/mcp-seo)
-* **Current Version:** `1.0.0`
+* **Current Version:** `1.0.1`
 
 ---
 

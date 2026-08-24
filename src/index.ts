@@ -1,6 +1,8 @@
 #!/usr/bin/env bun
+import http from 'node:http';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { z } from 'zod';
 
 import { discoverProject } from './analyzer/discovery.ts';
@@ -17,6 +19,8 @@ import { auditSchema } from './analyzer/schema.ts';
 import { auditInternalLinks } from './analyzer/internal-links.ts';
 import { generateAuditReport, formatReportToMarkdown } from './analyzer/report.ts';
 import { generateMarketingStrategy, formatMarketingStrategyToMarkdown } from './analyzer/strategy.ts';
+import { suggestRelatedEcosystem, formatEcosystemToMarkdown } from './analyzer/ecosystem.ts';
+import { testWebMcpSupport, formatWebMcpTestToMarkdown } from './analyzer/web-mcp-detector.ts';
 import { generateCodeFix } from './fixer/code-fixer.ts';
 import { validateCodeFix } from './fixer/validator.ts';
 import type { AuditIssue, ProjectDiscoveryResult } from './types/index.ts';
@@ -24,7 +28,7 @@ import type { AuditIssue, ProjectDiscoveryResult } from './types/index.ts';
 // Initialize McpServer
 const server = new McpServer({
   name: 'mcp-seo',
-  version: '1.0.0'
+  version: '1.0.1'
 });
 
 // ==========================================
@@ -152,6 +156,34 @@ Focus on:
 2. Conversion Rate Optimization (CRO) with CTA clarity, friction reduction, and social proof.
 3. Answer Engine Optimization (AEO) and AI Overview capture blueprint.
 4. Prioritized 30-60-90 day execution roadmap with projected KPI growth.`
+          }
+        }
+      ]
+    };
+  }
+);
+
+server.registerPrompt(
+  'related_ecosystem_and_competitor_analysis',
+  {
+    description: 'Analyze industry vertical, infer competitor archetypes, identify high-authority backlink/directory targets, and build keyword topic clusters for a project.',
+    argsSchema: {
+      target: z.string().describe('Directory path to the website codebase or a live URL (https://...) to analyze.')
+    }
+  },
+  ({ target }) => {
+    return {
+      messages: [
+        {
+          role: 'user',
+          content: {
+            type: 'text',
+            text: `Please analyze the target project "${target}" to discover its related web ecosystem:
+1. Infer its exact industry vertical, niche, and target audience model.
+2. Provide competitor benchmarks and differentiation strategies.
+3. Recommend top directory submission platforms and citation targets.
+4. Generate high-converting keyword topic clusters and content angles.
+5. Advise on Schema.org Knowledge Graph entity connections for AI search discovery.`
           }
         }
       ]
@@ -491,17 +523,208 @@ server.registerTool(
   }
 );
 
+server.registerTool(
+  'seo_suggest_related_ecosystem',
+  {
+    description: 'Discovers related website ecosystems, infers market vertical & competitor archetypes, suggests high-authority directory/backlink targets, and generates keyword topic clusters.',
+    inputSchema: {
+      target: z.string().describe('Directory path to the website codebase or a live URL (https://...) to analyze.')
+    }
+  },
+  async ({ target }) => {
+    const isUrl = /^https?:\/\//i.test(target);
+    let discovery: ProjectDiscoveryResult | undefined;
+    if (!isUrl) {
+      discovery = await discoverProject(target);
+    }
+    const pageData = await crawlUrlOrFile(target, discovery);
+    const ecosystem = suggestRelatedEcosystem(target, pageData, discovery);
+    const markdown = formatEcosystemToMarkdown(ecosystem);
+
+    return {
+      content: [
+        { type: 'text', text: markdown },
+        { type: 'text', text: `\n\n\`\`\`json\n${JSON.stringify(ecosystem, null, 2)}\n\`\`\`` }
+      ]
+    };
+  }
+);
+
+server.registerTool(
+  'seo_test_web_mcp',
+  {
+    description: 'Tests a live website to check if Web MCP (SSE/HTTP endpoint or manifest) is enabled, extracts active exposed tools, and provides enablement guidance.',
+    inputSchema: {
+      url: z.string().describe('Live website URL to test for Web MCP enablement (e.g. https://example.com).')
+    }
+  },
+  async ({ url }) => {
+    let pageData;
+    try {
+      pageData = await crawlUrlOrFile(url);
+    } catch {
+      // Crawling optional if site blocks
+    }
+    const result = await testWebMcpSupport(url, pageData);
+    const markdown = formatWebMcpTestToMarkdown(result);
+
+    return {
+      content: [
+        { type: 'text', text: markdown },
+        { type: 'text', text: `\n\n\`\`\`json\n${JSON.stringify(result, null, 2)}\n\`\`\`` }
+      ]
+    };
+  }
+);
+
 // ==========================================
-// 3. START SERVER VIA STDIO
+// 3. SERVER TRANSPORT INITIALIZATION (STDIO + STREAMABLE HTTP)
 // ==========================================
 
+function getLandingPageHtml(port: number): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCP-SEO Web Server</title>
+  <style>
+    :root { --bg: #0d1117; --card: #161b22; --border: #30363d; --text: #c9d1d9; --accent: #58a6ff; --green: #3fb950; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); padding: 2rem; max-width: 900px; margin: 0 auto; line-height: 1.6; }
+    h1 { color: #fff; display: flex; align-items: center; gap: 0.5rem; }
+    .badge { background: var(--green); color: #000; font-size: 0.75rem; padding: 0.2rem 0.6rem; border-radius: 999px; font-weight: bold; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0; }
+    code { background: #21262d; color: var(--accent); padding: 0.2rem 0.4rem; border-radius: 4px; font-family: ui-monospace, monospace; }
+    pre { background: #21262d; padding: 1rem; border-radius: 6px; overflow-x: auto; border: 1px solid var(--border); }
+    ul { padding-left: 1.2rem; }
+    li { margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body>
+  <h1>🌐 MCP-SEO Server <span class="badge">LIVE (Streamable HTTP / SSE)</span></h1>
+  <p>SEO, AEO, GEO, Local SEO & Digital Marketing Growth Auditor + Safe Code Fixer MCP Server.</p>
+  
+  <div class="card">
+    <h3>🔗 Connection Endpoints</h3>
+    <ul>
+      <li><strong>Streamable MCP Endpoint:</strong> <code>GET /mcp</code> or <code>POST /mcp</code></li>
+      <li><strong>SSE Stream (Legacy Alias):</strong> <code>GET /sse</code></li>
+      <li><strong>Message Endpoint (Legacy Alias):</strong> <code>POST /message</code></li>
+      <li><strong>Health Check:</strong> <code>GET /health</code></li>
+      <li><strong>Info / Meta:</strong> <code>GET /info</code></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>🤖 Client Configuration Example (Claude Desktop / Cursor / Remote AI)</h3>
+    <pre><code>{
+  "mcpServers": {
+    "seo-growth-auditor": {
+      "url": "http://localhost:${port}/mcp"
+    }
+  }
+}</code></pre>
+  </div>
+</body>
+</html>`;
+}
+
+function startHttpServer(port: number = 3000, host: string = '0.0.0.0') {
+  const streamableTransport = new StreamableHTTPServerTransport({
+    sessionIdGenerator: undefined
+  });
+
+  server.connect(streamableTransport);
+
+  const httpServer = http.createServer(async (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-session-id');
+
+    if (req.method === 'OPTIONS') {
+      res.writeHead(200);
+      res.end();
+      return;
+    }
+
+    const hostHeader = req.headers.host || `localhost:${port}`;
+    const url = new URL(req.url || '/', `http://${hostHeader}`);
+
+    if (url.pathname === '/health') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ status: 'ok', uptime: process.uptime(), version: '1.0.1' }));
+      return;
+    }
+
+    if (url.pathname === '/info') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(
+        JSON.stringify({
+          name: 'io.github.sparrow84001/mcp-seo',
+          version: '1.0.1',
+          author: 'Sayanta Neogi',
+          description: 'SEO, AEO, GEO, Local SEO & CRO Growth Auditor + Safe Code Fixer',
+          transport: 'streamable-http',
+          endpoints: { mcp: '/mcp', sse: '/sse', message: '/message', health: '/health' },
+          toolsCount: 17
+        })
+      );
+      return;
+    }
+
+    if (
+      url.pathname === '/mcp' ||
+      url.pathname === '/sse' ||
+      url.pathname === '/message' ||
+      url.pathname.startsWith('/mcp/')
+    ) {
+      await streamableTransport.handleRequest(req, res);
+      return;
+    }
+
+    if (url.pathname === '/') {
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(getLandingPageHtml(port));
+      return;
+    }
+
+    res.writeHead(404, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Not Found' }));
+  });
+
+  httpServer.listen(port, host, () => {
+    console.error(`🚀 MCP-SEO Web Server running on http://${host}:${port}`);
+    console.error(`   - Streamable HTTP/SSE: http://${host}:${port}/mcp (or /sse)`);
+    console.error(`   - Health Check:        http://${host}:${port}/health`);
+    console.error(`   - Info / Metadata:     http://${host}:${port}/info`);
+  });
+}
+
 async function main() {
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-  console.error('MCP SEO Server running on stdio');
+  const args = process.argv.slice(2);
+  const isHttp = args.includes('--http') || args.includes('-h') || process.env.MCP_TRANSPORT === 'http' || Boolean(process.env.PORT);
+
+  if (isHttp) {
+    const portArgIndex = args.indexOf('--port');
+    const portArg = portArgIndex !== -1 ? args[portArgIndex + 1] : undefined;
+    const customPort = portArg ? parseInt(portArg, 10) : undefined;
+    const port = customPort || (process.env.PORT ? parseInt(process.env.PORT, 10) : 3000);
+
+    const hostArgIndex = args.indexOf('--host');
+    const hostArg = hostArgIndex !== -1 ? args[hostArgIndex + 1] : undefined;
+    const customHost = hostArg || undefined;
+    const host = customHost || process.env.HOST || '0.0.0.0';
+
+    startHttpServer(port, host);
+  } else {
+    const transport = new StdioServerTransport();
+    await server.connect(transport);
+    console.error('MCP SEO Server running on stdio');
+  }
 }
 
 main().catch((err) => {
   console.error('Fatal server error:', err);
   process.exit(1);
 });
+

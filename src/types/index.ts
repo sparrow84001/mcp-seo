@@ -267,3 +267,69 @@ export interface ValidationResult {
   afterScores: Partial<Record<AuditDimension, number>>;
   improvements: string[];
 }
+
+export type IndustryVertical =
+  | 'b2b-saas-devtools'
+  | 'ecommerce-retail'
+  | 'agency-professional-services'
+  | 'fintech-finance'
+  | 'healthcare-wellness'
+  | 'education-edtech'
+  | 'media-publishing'
+  | 'local-home-services'
+  | 'real-estate-property'
+  | 'general-business';
+
+export interface IndustryNicheProfile {
+  vertical: IndustryVertical;
+  primaryNiche: string;
+  targetAudienceType: 'B2B' | 'B2C' | 'B2B2C' | 'Enterprise' | 'Local Consumers';
+  marketPositioningSummary: string;
+  inferredValueDrivers: string[];
+}
+
+export interface CompetitorArchetype {
+  category: 'Market Leader / Benchmark' | 'Direct Competitor' | 'Niche Alternative / Challenger';
+  archetypeName: string;
+  typicalDomainExample: string;
+  whatTheyDoWell: string;
+  howToOutrankOrDifferentiate: string;
+}
+
+export interface BacklinkDirectoryProspect {
+  platformName: string;
+  urlOrDomain: string;
+  category: 'Review Platform' | 'Industry Directory' | 'High-DA Citation' | 'Community / Showcase';
+  importance: 'High' | 'Medium' | 'Essential';
+  recommendedListingAction: string;
+}
+
+export interface KeywordTopicCluster {
+  clusterTheme: string;
+  sampleSearchQueries: string[];
+  contentAngle: string;
+  searchIntent: SearchIntent;
+  conversionPotential: 'High' | 'Medium';
+}
+
+export interface EntityKnowledgeGraphSuggestion {
+  entityName: string;
+  wikidataUrl?: string;
+  recommendedSchemaType: string;
+  sameAsCandidates: string[];
+  contextReasoning: string;
+}
+
+export interface RelatedEcosystemResult {
+  timestamp: string;
+  target: string;
+  nicheProfile: IndustryNicheProfile;
+  competitorArchetypes: CompetitorArchetype[];
+  authorityDirectoryProspects: BacklinkDirectoryProspect[];
+  keywordTopicClusters: KeywordTopicCluster[];
+  knowledgeGraphSuggestions: EntityKnowledgeGraphSuggestion[];
+  strategicGrowthAdvice: string[];
+}
+
+export type ServerTransportMode = 'stdio' | 'http' | 'sse';
+
