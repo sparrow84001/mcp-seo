@@ -107,4 +107,5 @@ jobs:
           bun-version: latest
 
       - name: Trigger Smithery Indexer
-        run: bunx @smithery/cli mcp publish https://mcp-seo-5dl7.onrender.com -n sparrow8400/mcp-seo
+        continue-on-error: true
+        run: bunx @smithery/cli mcp publish https://mcp-seo-5dl7.onrender.com -n sparrow8400/mcp-seo || true
