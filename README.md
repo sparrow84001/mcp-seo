@@ -1,7 +1,7 @@
 # SEO, AEO, GEO & Digital Marketing Audit + Safe Fix MCP Server
 
 [![CI & PR Validation](https://github.com/sparrow84001/mcp-seo/actions/workflows/ci.yml/badge.svg)](https://github.com/sparrow84001/mcp-seo/actions/workflows/ci.yml)
-[![Version](https://img.shields.io/badge/version-1.0.3-blue.svg)](https://github.com/sparrow84001/mcp-seo)
+[![Version](https://img.shields.io/badge/version-1.0.4-blue.svg)](https://github.com/sparrow84001/mcp-seo)
 [![TypeScript](https://img.shields.io/badge/TypeScript-7.0.2-blue.svg)](https://www.typescriptlang.org/)
 [![Bun](https://img.shields.io/badge/Bun-1.4.0-black.svg)](https://bun.sh)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
@@ -10,7 +10,7 @@
 An advanced, AI-powered Model Context Protocol (MCP) server that acts as a comprehensive **Growth Auditor, Search & AI Engine Optimizer, and Framework-Aware Code Fixer**.
 
 > **Developed by:** **Sayanta Neogi** ([@sparrow84001](https://github.com/sparrow84001)) • 📧 [sparrow8400@gmail.com](mailto:sparrow8400@gmail.com)  
-> **Repository:** [github.com/sparrow84001/mcp-seo](https://github.com/sparrow84001/mcp-seo) • **Version:** `1.0.3`
+> **Repository:** [github.com/sparrow84001/mcp-seo](https://github.com/sparrow84001/mcp-seo) • **Version:** `1.0.4`
 
 Designed for seamless integration with **Antigravity 2.0**, **GitHub Copilot**, **Claude Desktop**, **Cursor**, and **Windsurf**. Built with **TypeScript 7** and powered by **Bun 1.4**.
 
@@ -170,6 +170,7 @@ Add to `.cursor/mcp.json` in your project root:
 | `seo_audit_internal_links` | Builds link graph, detects orphan pages, generic anchor text, suggests contextual links | `target` |
 | `seo_generate_full_audit` | Consolidates all 8 dimensions into weighted 0-100 scores, P0-P3 matrix, and Markdown report | `target`, `projectPath?` |
 | `seo_suggest_related_ecosystem` | Discovers related website ecosystems, infers market niche, benchmark competitors, directory/citation targets & keyword clusters | `target` |
+| `seo_test_web_mcp` | Tests a live website to check if Web MCP is enabled, extracts active exposed tools, and provides enablement recommendations | `url` |
 | `seo_generate_marketing_strategy` | Formulates high-ROI digital marketing growth blueprint, CRO plan, AEO strategy & 30-60-90 day roadmap | `target`, `projectPath?` |
 | `seo_generate_code_fix` | Framework-aware code generation (Laravel Blade, Next.js, Astro, HTML) with unified diff | `filePath`, `title?`, `metaDescription?`, `canonicalUrl?`, `jsonLdSchema?`, `applyDirectly?` |
 | `seo_validate_code_fix` | Post-fix validation: checks duplicate tags, JSON-LD syntax, Before/After score diff | `filePath`, `beforeScores?` |
@@ -234,7 +235,7 @@ This server is packaged and ready for the **Official Model Context Protocol Regi
 * **GitHub Profile:** [@sparrow84001](https://github.com/sparrow84001)
 * **Email:** [sparrow8400@gmail.com](mailto:sparrow8400@gmail.com)
 * **Project Repository:** [https://github.com/sparrow84001/mcp-seo](https://github.com/sparrow84001/mcp-seo)
-* **Current Version:** `1.0.3`
+* **Current Version:** `1.0.4`
 
 ---
 
