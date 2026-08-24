@@ -684,29 +684,22 @@ function startHttpServer(port: number = 3000, host: string = '0.0.0.0') {
         },
         authentication: { required: false },
         tools: [
-          {
-            name: 'seo_discover_project',
-            description: 'Discovers website framework, routes, sitemaps, robots, llms.txt and page inventory.',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                projectPath: { type: 'string' }
-              },
-              required: ['projectPath']
-            }
-          },
-          {
-            name: 'seo_crawl_and_extract',
-            description: 'Crawls a live URL or reads a local file to extract SEO signals and page metadata.',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                target: { type: 'string' },
-                pageType: { type: 'string' }
-              },
-              required: ['target']
-            }
-          }
+          { name: 'seo_discover_project', description: 'Discovers website framework, routes, sitemaps, robots, llms.txt and page inventory.', inputSchema: { type: 'object', properties: { projectPath: { type: 'string' } }, required: ['projectPath'] } },
+          { name: 'seo_crawl_and_extract', description: 'Crawls a live URL or reads a local file to extract SEO signals and page metadata.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
+          { name: 'seo_audit_technical', description: 'Audits technical SEO foundations: canonicals, robots, sitemaps, indexing directives.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
+          { name: 'seo_audit_onpage', description: 'Audits on-page SEO: title, meta description, heading hierarchy, content length.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
+          { name: 'seo_audit_aeo', description: 'Audits Answer Engine Optimization for Google AI Overviews and Perplexity citations.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
+          { name: 'seo_audit_geo', description: 'Audits Generative Engine Optimization: brand clarity, entity schema, topical authority.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
+          { name: 'seo_audit_local', description: 'Audits Local SEO signals: NAP, local business schema, geographic landing pages.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
+          { name: 'seo_audit_content', description: 'Evaluates content quality, informational depth, and search intent alignment.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
+          { name: 'seo_audit_conversion', description: 'Audits conversion optimization (CRO): call-to-action visibility, form usability, trust signals.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
+          { name: 'seo_audit_performance', description: 'Audits Core Web Vitals risk factors: unoptimized images, heavy scripts, render-blocking resources.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
+          { name: 'seo_audit_schema', description: 'Validates Schema.org structured data JSON-LD coverage and correctness.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
+          { name: 'seo_audit_internal_links', description: 'Audits internal linking structure, anchor text, and navigation links.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
+          { name: 'seo_generate_full_audit', description: 'Runs a comprehensive 8-dimension SEO, AEO, GEO, Local, Content, and Performance audit report.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
+          { name: 'seo_generate_marketing_strategy', description: 'Generates a strategic digital marketing plan, CRO levers, and prioritized 30-60-90 day growth roadmap.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
+          { name: 'seo_suggest_related_ecosystem', description: 'Discovers related website ecosystems, infers market vertical & competitor archetypes, suggests high-authority directories, and generates keyword clusters.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
+          { name: 'seo_test_web_mcp', description: 'Tests a live website to check if Web MCP is enabled, extracts active exposed tools, and provides enablement recommendations.', inputSchema: { type: 'object', properties: { url: { type: 'string' } }, required: ['url'] } }
         ],
         resources: [],
         prompts: []
@@ -720,6 +713,9 @@ function startHttpServer(port: number = 3000, host: string = '0.0.0.0') {
       url.pathname === '/message' ||
       url.pathname.startsWith('/mcp/')
     ) {
+      if (!req.headers.accept || req.headers.accept === '*/*' || !req.headers.accept.includes('text/event-stream')) {
+        req.headers.accept = 'application/json, text/event-stream';
+      }
       await streamableTransport.handleRequest(req, res);
       return;
     }
