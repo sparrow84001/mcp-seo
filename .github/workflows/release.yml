@@ -91,3 +91,20 @@ jobs:
 
       - name: Publish to Official MCP Registry
         run: ./mcp-publisher publish
+
+  publish-smithery:
+    name: Auto-Trigger Smithery.ai Indexer
+    needs: create-release
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Trigger Smithery Indexer
+        run: bunx @smithery/cli mcp publish https://github.com/sparrow84001/mcp-seo -n sparrow8400/mcp-seo
