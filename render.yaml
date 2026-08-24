@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: mcp-seo
+    runtime: docker
+    plan: free
+    region: oregon
+    healthCheckPath: /health
+    envVars:
+      - key: MCP_TRANSPORT
+        value: http
+      - key: PORT
+        value: 10000
