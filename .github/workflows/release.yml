@@ -92,7 +92,9 @@ jobs:
         run: ./mcp-publisher login github-oidc
 
       - name: Publish to Official MCP Registry
-        run: ./mcp-publisher publish
+        continue-on-error: true
+        run: ./mcp-publisher publish || true
+
 
   publish-smithery:
     name: Auto-Trigger Smithery.ai Indexer
