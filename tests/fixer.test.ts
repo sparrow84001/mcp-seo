@@ -69,14 +69,31 @@ const old = "test";
       filePath: tempAstro,
       framework: 'astro',
       title: 'Astro SEO Optimized Page',
-      metaDescription: 'Astro page description'
+      metaDescription: 'Astro page description',
+      webMcpEndpoint: '/mcp'
     });
 
     expect(fix.proposedChange).toContain('const title = "Astro SEO Optimized Page";');
     expect(fix.proposedChange).toContain('const description = "Astro page description";');
+    expect(fix.proposedChange).toContain('<link rel="mcp-server" href="/mcp" />');
 
     if (fs.existsSync(tempAstro)) {
       fs.unlinkSync(tempAstro);
     }
   });
+
+  it('should inject WebMCP discovery links and generate valid manifests', async () => {
+    const { generateServerCardContent, generateLlmsTxtContent } = await import('../src/fixer/code-fixer.ts');
+
+    const cardJson = generateServerCardContent('my-mcp', '/api/mcp', 'My custom MCP description');
+    const parsed = JSON.parse(cardJson);
+    expect(parsed.serverInfo.name).toBe('my-mcp');
+    expect(parsed.endpoints.mcp).toBe('/api/mcp');
+    expect(parsed.tools.length).toBeGreaterThanOrEqual(1);
+
+    const llms = generateLlmsTxtContent('Test Site', 'Site summary', '/mcp');
+    expect(llms).toContain('# Test Site');
+    expect(llms).toContain('MCP Streamable HTTP Endpoint: `/mcp`');
+  });
 });
+

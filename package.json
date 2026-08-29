@@ -3,6 +3,7 @@
   "mcpName": "io.github.sparrow84001/mcp-seo",
   "version": "1.0.5",
   "description": "SEO, AEO, GEO, Local SEO & Digital Marketing Growth Auditor + Safe Code Fixer MCP Server",
+
   "main": "dist/index.js",
   "module": "src/index.ts",
   "bin": {

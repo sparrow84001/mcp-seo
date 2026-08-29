@@ -47,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.1] - 2026-08-24
 
+
 ### 🌟 What's New & Major Highlights
 
 #### 1. 🔍 Live Website Web MCP Tester (`seo_test_web_mcp`)

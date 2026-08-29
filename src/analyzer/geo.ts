@@ -128,5 +128,29 @@ export function auditGeo(page: PageData): AuditIssue[] {
     }
   }
 
+  // 5. Machine-Actionable Server Card Manifest (Generative Engine Integration)
+  const rawHtml = page.rawHtml || '';
+  const hasServerCard = rawHtml.includes('server-card.json') || rawHtml.includes('rel="mcp-server"');
+  if (!hasServerCard && (page.pageType === 'homepage' || page.pageType === 'landing')) {
+    issues.push({
+      id: 'GEO_MISSING_SERVER_CARD_MANIFEST',
+      dimension: 'geo',
+      title: 'Missing /.well-known/mcp/server-card.json Machine Manifest',
+      severity: 'low',
+      priority: 'P3',
+      priorityScore: 5.5,
+      evidence: 'No discovery manifest card detected for autonomous AI agent tool invocation.',
+      evidenceType: 'recommended',
+      filePath: page.filePath,
+      whyItMatters:
+        'AI registries (Smithery, MCP directories) and Generative Search assistants require a machine-readable server card manifest to index exposed actions and APIs.',
+      recommendedSolution: 'Create `public/.well-known/mcp/server-card.json` containing serverInfo, tools, and endpoints.',
+      implementationApproach: 'Use `generateServerCardContent()` helper or host server card JSON.',
+      expectedImpact: 'Enables 1-click cataloging across agentic search engines and AI developer tools.',
+      effort: 'low'
+    });
+  }
+
   return issues;
 }
+

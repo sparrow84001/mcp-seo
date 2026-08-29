@@ -10,7 +10,8 @@ describe('Smithery-compatible HTTP metadata', () => {
           JSON.stringify({
             serverInfo: {
               name: 'mcp-seo',
-              version: '1.0.3',
+              version: '1.0.5',
+
               description: 'SEO, AEO, GEO, Local SEO & CRO Growth Auditor + Safe Code Fixer'
             },
             authentication: { required: false },
@@ -36,8 +37,9 @@ describe('Smithery-compatible HTTP metadata', () => {
 
       const body = (await response.json()) as any;
       expect(body.serverInfo.name).toBe('mcp-seo');
-      expect(body.serverInfo.version).toBe('1.0.3');
+      expect(body.serverInfo.version).toBe('1.0.5');
       expect(body.tools.length).toBeGreaterThanOrEqual(2);
+
     } finally {
       await new Promise<void>((resolve) => testServer.close(() => resolve()));
     }

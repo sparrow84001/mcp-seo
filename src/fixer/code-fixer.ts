@@ -16,6 +16,9 @@ export interface CodeFixOptions {
     type?: string;
   };
   jsonLdSchema?: Record<string, any>;
+  webMcpEndpoint?: string;
+  addWebMcpDiscovery?: boolean;
+  addWebMcpClientScript?: boolean;
   applyDirectly?: boolean;
 }
 
@@ -63,12 +66,16 @@ export function generateCodeFix(options: CodeFixOptions): CodeFixPlan {
     id: `FIX_${Date.now()}`,
     file: fullPath,
     framework: fw,
-    existingProblem: 'Missing or suboptimal SEO metadata and structured data in file.',
+    existingProblem: options.addWebMcpDiscovery || options.webMcpEndpoint
+      ? 'Missing WebMCP discovery link and endpoint declaration for AI search agents.'
+      : 'Missing or suboptimal SEO metadata and structured data in file.',
     proposedChange: updatedCode,
     unifiedDiff,
-    reason: 'Surgical update of title, meta description, canonical, and Schema.org structured data.',
+    reason: options.addWebMcpDiscovery || options.webMcpEndpoint
+      ? 'Injection of official WebMCP <link rel="mcp-server"> and standard metadata tags.'
+      : 'Surgical update of title, meta description, canonical, and Schema.org structured data.',
     risk: 'low',
-    expectedResult: 'Standard-compliant SEO metadata and JSON-LD schema without breaking layout.',
+    expectedResult: 'Standard-compliant SEO metadata, WebMCP autodiscovery, and JSON-LD schema without breaking layout.',
     status: options.applyDirectly ? 'applied' : 'proposed'
   };
 }
@@ -99,6 +106,16 @@ function applyAstroFixes(code: string, opts: CodeFixOptions): string {
       res = parts.join('---');
     }
   }
+
+  const endpoint = opts.webMcpEndpoint || (opts.addWebMcpDiscovery ? '/mcp' : undefined);
+  if (endpoint && !res.includes('rel="mcp-server"')) {
+    if (res.includes('<head>')) {
+      res = res.replace('<head>', `<head>\n    <link rel="mcp-server" href="${endpoint}" />`);
+    } else {
+      res = `<link rel="mcp-server" href="${endpoint}" />\n` + res;
+    }
+  }
+
   return res;
 }
 
@@ -123,6 +140,16 @@ function applyLaravelBladeFixes(code: string, opts: CodeFixOptions): string {
       );
     } else {
       res = `@section('meta_description', '${escapeQuotes(opts.metaDescription)}')\n` + res;
+    }
+  }
+
+  // WebMCP Discovery Link
+  const endpoint = opts.webMcpEndpoint || (opts.addWebMcpDiscovery ? '/api/mcp' : undefined);
+  if (endpoint && !res.includes('rel="mcp-server"')) {
+    if (res.includes('<head>')) {
+      res = res.replace('<head>', `<head>\n    <link rel="mcp-server" href="${endpoint}" />`);
+    } else {
+      res = `<link rel="mcp-server" href="${endpoint}" />\n` + res;
     }
   }
 
@@ -160,17 +187,28 @@ function applyNextAppRouterFixes(code: string, opts: CodeFixOptions): string {
     res = metaBlock + res;
   }
 
+  const endpoint = opts.webMcpEndpoint || (opts.addWebMcpDiscovery ? '/api/mcp' : undefined);
+  if (endpoint && !res.includes('rel="mcp-server"') && !res.includes("rel: 'mcp-server'")) {
+    if (res.includes('<head>')) {
+      res = res.replace('<head>', `<head>\n        <link rel="mcp-server" href="${endpoint}" />`);
+    } else if (res.includes('<html>')) {
+      res = res.replace('<html>', `<html>\n      <head>\n        <link rel="mcp-server" href="${endpoint}" />\n      </head>`);
+    }
+  }
+
   return res;
 }
 
 function applyNextPagesRouterFixes(code: string, opts: CodeFixOptions): string {
   let res = code;
+  const endpoint = opts.webMcpEndpoint || (opts.addWebMcpDiscovery ? '/api/mcp' : undefined);
+  const mcpLink = endpoint ? `\n  <link rel="mcp-server" href="${endpoint}" />` : '';
+
   const headBlock = `<Head>\n  <title>${escapeQuotes(opts.title || '')}</title>\n  <meta name="description" content="${escapeQuotes(
     opts.metaDescription || ''
-  )}" />\n</Head>\n`;
+  )}" />${mcpLink}\n</Head>\n`;
 
   if (res.includes('<Head>')) {
-    // Replace Head contents
     res = res.replace(/<Head>[\s\S]*?<\/Head>/i, headBlock);
   } else {
     res = `import Head from 'next/head';\n\n` + res;
@@ -192,6 +230,10 @@ function applyGenericHtmlFixes(code: string, opts: CodeFixOptions): string {
     if (opts.canonicalUrl && !res.includes('rel="canonical"')) {
       headAdditions += `  <link rel="canonical" href="${opts.canonicalUrl}" />\n`;
     }
+    const endpoint = opts.webMcpEndpoint || (opts.addWebMcpDiscovery ? '/mcp' : undefined);
+    if (endpoint && !res.includes('rel="mcp-server"')) {
+      headAdditions += `  <link rel="mcp-server" href="${endpoint}" />\n`;
+    }
     if (opts.jsonLdSchema && !res.includes('application/ld+json')) {
       headAdditions += `  <script type="application/ld+json">\n${JSON.stringify(opts.jsonLdSchema, null, 2)}\n  </script>\n`;
     }
@@ -201,6 +243,59 @@ function applyGenericHtmlFixes(code: string, opts: CodeFixOptions): string {
 
   return res;
 }
+
+export function generateServerCardContent(name: string, endpoint: string = '/mcp', description?: string): string {
+  return JSON.stringify(
+    {
+      serverInfo: {
+        name: name || 'website-mcp',
+        version: '1.0.0',
+        description: description || 'WebMCP server providing search and interactive capabilities for AI agents.'
+      },
+      authentication: { required: false },
+      transport: 'streamable-http',
+      endpoints: {
+        mcp: endpoint,
+        sse: '/sse'
+      },
+      tools: [
+        {
+          name: 'search_site_content',
+          description: 'Search articles, documentation, products, and services on this website.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              query: { type: 'string', description: 'Search keyword' }
+            },
+            required: ['query']
+          }
+        }
+      ]
+    },
+    null,
+    2
+  );
+}
+
+export function generateLlmsTxtContent(title: string, description: string, mcpEndpoint: string = '/mcp'): string {
+  return `# ${title}
+
+> ${description}
+
+## WebMCP AI Agent Tools
+* MCP Streamable HTTP Endpoint: \`${mcpEndpoint}\`
+* Discovery Manifest: \`/.well-known/mcp/server-card.json\`
+* Official Spec: https://modelcontextprotocol.io/docs/transports/streamable-http
+
+## Key Documentation & URLs
+* Homepage: /
+* Documentation: /docs
+* API: /api
+`;
+}
+
+export { generateSitemapXml, generateRobotsTxt } from '../analyzer/sitemap-crawler.ts';
+
 
 function escapeQuotes(str: string): string {
   return str.replace(/'/g, "\\'");
@@ -228,3 +323,4 @@ function createUnifiedDiff(filePath: string, oldStr: string, newStr: string): st
 
   return diffLines.slice(0, 50).join('\n');
 }
+

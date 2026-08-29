@@ -22,9 +22,19 @@ import { generateAuditReport, formatReportToMarkdown } from './analyzer/report.t
 import { generateMarketingStrategy, formatMarketingStrategyToMarkdown } from './analyzer/strategy.ts';
 import { suggestRelatedEcosystem, formatEcosystemToMarkdown } from './analyzer/ecosystem.ts';
 import { testWebMcpSupport, formatWebMcpTestToMarkdown } from './analyzer/web-mcp-detector.ts';
+import {
+  auditSitemapMultipage,
+  fetchAndParseRobotsTxt,
+  fetchAndParseSitemap,
+  auditSecurityHeaders,
+  generateSitemapXml,
+  generateRobotsTxt,
+  formatMultipageReportToMarkdown
+} from './analyzer/sitemap-crawler.ts';
 import { generateCodeFix } from './fixer/code-fixer.ts';
 import { validateCodeFix } from './fixer/validator.ts';
 import type { AuditIssue, ProjectDiscoveryResult } from './types/index.ts';
+
 
 // Initialize McpServer
 const server = new McpServer({
@@ -191,6 +201,76 @@ server.registerPrompt(
     };
   }
 );
+
+server.registerPrompt(
+  'webmcp_implementation_and_fix',
+  {
+    description: 'Diagnose WebMCP support, inspect protocol compliance (Streamable HTTP, SSE, CORS, DNS rebinding security), and generate production-ready code fixes for any programming language or framework.',
+    argsSchema: {
+      target: z.string().describe('Website URL or local codebase root.'),
+      language: z.enum([
+        'typescript-node',
+        'nextjs-app',
+        'nextjs-pages',
+        'python-fastapi',
+        'php-laravel',
+        'go',
+        'rust',
+        'csharp-dotnet',
+        'java-spring',
+        'ruby-rails',
+        'static-browser-dom',
+        'all'
+      ]).optional().describe('Target programming language or framework.')
+    }
+  },
+  ({ target, language }) => {
+    return {
+      messages: [
+        {
+          role: 'user',
+          content: {
+            type: 'text',
+            text: `Please diagnose WebMCP support for target "${target}"${language ? ` focusing on ${language}` : ''}.
+1. Check for Streamable HTTP (/mcp), Legacy SSE (/sse), and discovery manifests (/.well-known/mcp/server-card.json, llms.txt, <link rel="mcp-server">).
+2. Audit CORS headers (Access-Control-Allow-Origin, mcp-session-id exposure) and origin validation security.
+3. Provide exact production code snippets and step-by-step fix guides to achieve full WebMCP compliance.`
+          }
+        }
+      ]
+    };
+  }
+);
+
+server.registerPrompt(
+  'multipage_sitemap_and_security_audit',
+  {
+    description: 'Run a comprehensive site-wide multi-page crawl using sitemap.xml, check robots.txt allow/disallow permissions for Googlebot and AI search crawlers, audit HTTP security headers (HSTS, CSP), and generate site-wide remediation plans.',
+    argsSchema: {
+      target: z.string().describe('Target website URL (https://...) or local project codebase folder path.')
+    }
+  },
+  ({ target }) => {
+    return {
+      messages: [
+        {
+          role: 'user',
+          content: {
+            type: 'text',
+            text: `Please run a comprehensive multi-page sitemap crawl and security audit for target: "${target}".
+1. Inspect robots.txt allow and disallow rules for Googlebot and AI crawlers (GPTBot, ClaudeBot, PerplexityBot).
+2. Parse sitemap.xml and all sub-sitemaps to extract all registered URLs.
+3. Check HTTP security headers (HSTS, CSP, X-Frame-Options, X-Content-Type-Options).
+4. Batch audit registered pages for SEO, AEO, GEO, CRO, and WebMCP.
+5. Aggregate site-wide deficits and generate fix files if sitemap.xml or robots.txt is missing.`
+          }
+        }
+      ]
+    };
+  }
+);
+
+
 
 // ==========================================
 // 2. REGISTER TOOLS (registerTool)
@@ -489,13 +569,15 @@ server.registerTool(
 server.registerTool(
   'seo_generate_code_fix',
   {
-    description: 'Generates surgical, framework-aware code fixes (Laravel Blade, Next.js App/Pages, HTML, PHP) with unified diff preview. Set applyDirectly to true to write changes.',
+    description: 'Generates surgical, framework-aware code fixes (Laravel Blade, Next.js App/Pages, HTML, PHP, Astro, Svelte) including WebMCP discovery link injection with unified diff preview. Set applyDirectly to true to write changes.',
     inputSchema: {
       filePath: z.string().describe('Path to the source file to modify.'),
       title: z.string().optional().describe('New or updated title tag.'),
       metaDescription: z.string().optional().describe('New or updated meta description.'),
       canonicalUrl: z.string().optional().describe('Canonical URL.'),
       jsonLdSchema: z.record(z.string(), z.any()).optional().describe('Schema.org JSON-LD object to inject.'),
+      webMcpEndpoint: z.string().optional().describe('WebMCP endpoint URL to inject into HTML <head> via <link rel="mcp-server" /> (e.g. /mcp or /api/mcp).'),
+      addWebMcpDiscovery: z.boolean().optional().describe('Whether to inject standard <link rel="mcp-server" href="/mcp" /> tag.'),
       applyDirectly: z.boolean().optional().describe('Whether to write changes directly to disk (default: false).')
     }
   },
@@ -554,20 +636,34 @@ server.registerTool(
 server.registerTool(
   'seo_test_web_mcp',
   {
-    description: 'Tests a live website to check if Web MCP (SSE/HTTP endpoint or manifest) is enabled, extracts active exposed tools, and provides enablement guidance.',
+    description: 'Tests a live website or local codebase to check if Web MCP (Streamable HTTP/SSE endpoint, manifest, or DOM tools) is enabled, runs protocol compliance diagnostics, and provides language-specific implementation code fixes.',
     inputSchema: {
-      url: z.string().describe('Live website URL to test for Web MCP enablement (e.g. https://example.com).')
+      url: z.string().describe('Live website URL to test for Web MCP enablement (e.g. https://example.com).'),
+      targetLanguage: z.enum([
+        'typescript-node',
+        'nextjs-app',
+        'nextjs-pages',
+        'python-fastapi',
+        'php-laravel',
+        'go',
+        'rust',
+        'csharp-dotnet',
+        'java-spring',
+        'ruby-rails',
+        'static-browser-dom',
+        'all'
+      ]).optional().describe('Optional target programming language or framework to generate customized code fixes for.')
     }
   },
-  async ({ url }) => {
+  async ({ url, targetLanguage }) => {
     let pageData;
     try {
       pageData = await crawlUrlOrFile(url);
     } catch {
       // Crawling optional if site blocks
     }
-    const result = await testWebMcpSupport(url, pageData);
-    const markdown = formatWebMcpTestToMarkdown(result);
+    const result = await testWebMcpSupport(url, pageData, undefined, targetLanguage as any);
+    const markdown = formatWebMcpTestToMarkdown(result, targetLanguage as any);
 
     return {
       content: [
@@ -577,6 +673,109 @@ server.registerTool(
     };
   }
 );
+
+server.registerTool(
+  'seo_audit_sitemap_multipage',
+
+  {
+    description: 'Crawls and audits every page registered in a website sitemap.xml (or local routes), cross-checks robots.txt allow/disallow rules, inspects HTTP security headers (HSTS, CSP), and generates a site-wide SEO/AEO/GEO/CRO health score, inventory table, and remediation roadmap.',
+    inputSchema: {
+      target: z.string().describe('Website URL (https://...) or local codebase folder path.'),
+      maxPages: z.number().optional().describe('Maximum number of sitemap URLs to crawl and audit (default: 25).'),
+      userAgent: z.string().optional().describe('Target crawler user-agent to test robots.txt permissions against (default: Googlebot).')
+    }
+  },
+  async ({ target, maxPages, userAgent }) => {
+    const isUrl = /^https?:\/\//i.test(target);
+    let discovery: ProjectDiscoveryResult | undefined;
+    if (!isUrl) {
+      discovery = await discoverProject(target);
+    }
+    const result = await auditSitemapMultipage(target, { maxPages, userAgent, discovery });
+    const markdown = formatMultipageReportToMarkdown(result);
+
+    return {
+      content: [
+        { type: 'text', text: markdown },
+        { type: 'text', text: `\n\n\`\`\`json\n${JSON.stringify(result, null, 2)}\n\`\`\`` }
+      ]
+    };
+  }
+);
+
+server.registerTool(
+  'seo_audit_robots_and_sitemap',
+  {
+    description: 'Deeply inspects robots.txt rules (allow/disallow per user-agent), sitemap.xml validity, disallowed pages mistakenly in sitemap, and HTTP security headers (HSTS, CSP, X-Frame-Options).',
+    inputSchema: {
+      target: z.string().describe('Website URL (https://...) or local codebase folder path.')
+    }
+  },
+  async ({ target }) => {
+    const robots = await fetchAndParseRobotsTxt(target);
+    const sitemap = await fetchAndParseSitemap(target, robots);
+    const security = await auditSecurityHeaders(target);
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(
+            {
+              target,
+              robotsTxt: robots,
+              sitemapXml: sitemap,
+              securityHeaders: security
+            },
+            null,
+            2
+          )
+        }
+      ]
+    };
+  }
+);
+
+server.registerTool(
+  'seo_generate_sitemap_and_robots',
+  {
+    description: 'Generates standard-compliant, production-ready sitemap.xml and robots.txt configuration files for any website or codebase.',
+    inputSchema: {
+      targetUrl: z.string().describe('Base website URL (e.g., https://example.com).'),
+      urls: z.array(z.string()).optional().describe('Array of relative or absolute URLs to register in sitemap.xml.'),
+      disallowedPaths: z.array(z.string()).optional().describe('Paths to disallow in robots.txt (e.g. ["/admin/", "/api/private/"]).')
+    }
+  },
+  async ({ targetUrl, urls, disallowedPaths }) => {
+    const sitemap = generateSitemapXml(urls || [targetUrl], targetUrl);
+    const robots = generateRobotsTxt({
+      sitemapUrl: `${targetUrl.replace(/\/$/, '')}/sitemap.xml`,
+      disallowedPaths
+    });
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `# 🗺️ Generated Sitemap.xml & Robots.txt Configuration Files
+
+### 1. \`public/sitemap.xml\`
+\`\`\`xml
+${sitemap}
+\`\`\`
+
+### 2. \`public/robots.txt\`
+\`\`\`text
+${robots}
+\`\`\`
+`
+        }
+      ]
+    };
+  }
+);
+
+
 
 // ==========================================
 // 3. SERVER TRANSPORT INITIALIZATION (STDIO + STREAMABLE HTTP)
@@ -663,12 +862,12 @@ function startHttpServer(port: number = 3000, host: string = '0.0.0.0') {
       res.end(
         JSON.stringify({
           name: 'io.github.sparrow84001/mcp-seo',
-          version: '1.0.4',
+          version: '1.0.5',
           author: 'Sayanta Neogi',
           description: 'SEO, AEO, GEO, Local SEO & CRO Growth Auditor + Safe Code Fixer',
           transport: 'streamable-http',
           endpoints: { mcp: '/mcp', sse: '/sse', message: '/message', health: '/health' },
-          toolsCount: 18
+          toolsCount: 19
         })
       );
       return;
@@ -679,7 +878,7 @@ function startHttpServer(port: number = 3000, host: string = '0.0.0.0') {
       res.end(JSON.stringify({
         serverInfo: {
           name: 'mcp-seo',
-          version: '1.0.4',
+          version: '1.0.5',
           description: 'SEO, AEO, GEO, Local SEO & CRO Growth Auditor + Safe Code Fixer'
         },
         authentication: { required: false },
@@ -699,13 +898,17 @@ function startHttpServer(port: number = 3000, host: string = '0.0.0.0') {
           { name: 'seo_generate_full_audit', description: 'Runs a comprehensive 8-dimension SEO, AEO, GEO, Local, Content, and Performance audit report.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
           { name: 'seo_generate_marketing_strategy', description: 'Generates a strategic digital marketing plan, CRO levers, and prioritized 30-60-90 day growth roadmap.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
           { name: 'seo_suggest_related_ecosystem', description: 'Discovers related website ecosystems, infers market vertical & competitor archetypes, suggests high-authority directories, and generates keyword clusters.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
-          { name: 'seo_test_web_mcp', description: 'Tests a live website to check if Web MCP is enabled, extracts active exposed tools, and provides enablement recommendations.', inputSchema: { type: 'object', properties: { url: { type: 'string' } }, required: ['url'] } }
+          { name: 'seo_test_web_mcp', description: 'Tests a live website to check if Web MCP is enabled, extracts active exposed tools, and provides enablement recommendations.', inputSchema: { type: 'object', properties: { url: { type: 'string' } }, required: ['url'] } },
+          { name: 'seo_audit_sitemap_multipage', description: 'Crawls all sitemap registered URLs, checks robots allow/disallow permissions, audits security headers (HSTS), and aggregates site-wide health scorecard.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
+          { name: 'seo_audit_robots_and_sitemap', description: 'Inspects robots.txt rules, sitemap index validity, and HTTP security headers (HSTS, CSP).', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
+          { name: 'seo_generate_sitemap_and_robots', description: 'Generates production-ready sitemap.xml and robots.txt files.', inputSchema: { type: 'object', properties: { targetUrl: { type: 'string' } }, required: ['targetUrl'] } }
         ],
         resources: [],
         prompts: []
       }));
       return;
     }
+
 
     if (
       url.pathname === '/mcp' ||

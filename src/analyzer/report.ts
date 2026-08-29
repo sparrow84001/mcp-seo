@@ -331,6 +331,70 @@ ${report.implementationPlan.phase4.map((p, i) => `${i + 1}. ${p}`).join('\n') ||
 
 ### Phase 5: Monitoring & Continuous Growth
 ${report.implementationPlan.phase5.map((p, i) => `${i + 1}. ${p}`).join('\n')}
+
+---
+
+## 🛠️ Multi-Language Framework Fix Matrix & Automation
+
+Apply surgical, language-specific fixes for the identified issues:
+
+### 1. Auto-Apply Safe Code Fixes via MCP
+Run in chat or call tool \`seo_generate_code_fix\`:
+\`\`\`json
+{
+  "tool": "seo_generate_code_fix",
+  "arguments": {
+    "filePath": "${report.codeProblems[0]?.file || 'resources/views/layouts/app.blade.php'}",
+    "title": "Optimized Page Title | Brand",
+    "metaDescription": "Concise 155-character description matching search intent.",
+    "canonicalUrl": "https://example.com/page",
+    "addWebMcpDiscovery": true,
+    "applyDirectly": false
+  }
+}
+\`\`\`
+
+### 2. Framework-Specific Implementation Guides
+
+#### 📦 Next.js (App Router)
+* **File:** \`app/layout.tsx\` or \`app/page.tsx\`
+\`\`\`typescript
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Optimized Title',
+  description: 'Search intent aligned description.',
+  alternates: { canonical: 'https://example.com' },
+  other: { 'mcp-server': '/api/mcp' }
+};
+\`\`\`
+
+#### 🐘 Laravel (Blade)
+* **File:** \`resources/views/layouts/app.blade.php\`
+\`\`\`html
+<head>
+    <title>@yield('title', 'Default Title')</title>
+    <meta name="description" content="@yield('meta_description', 'Default description')">
+    <link rel="canonical" href="{{ url()->current() }}" />
+    <link rel="mcp-server" href="/api/mcp" />
+    @stack('scripts')
+</head>
+\`\`\`
+
+#### 🐍 Python (FastAPI / Django)
+* **File:** \`templates/base.html\` / \`app/mcp_server.py\`
+\`\`\`html
+<link rel="canonical" href="{{ request.url }}" />
+<link rel="mcp-server" href="/mcp" />
+\`\`\`
+
+#### 🚀 Static HTML / Astro / SvelteKit
+* **File:** \`public/llms.txt\` & \`public/.well-known/mcp/server-card.json\`
+\`\`\`html
+<link rel="canonical" href="https://example.com" />
+<link rel="mcp-server" href="/mcp" />
+<script src="/webmcp.js"></script>
+\`\`\`
 `;
 }
 
@@ -346,3 +410,4 @@ function formatIssuesList(issues: AuditIssue[]): string {
     )
     .join('\n\n');
 }
+

@@ -309,6 +309,79 @@ function detectFramework(projectPath: string): {
     }
   }
 
+  // Python (FastAPI, Django, Flask)
+  if (
+    fs.existsSync(path.join(projectPath, 'requirements.txt')) ||
+    fs.existsSync(path.join(projectPath, 'pyproject.toml')) ||
+    fs.existsSync(path.join(projectPath, 'manage.py'))
+  ) {
+    const isDjango = fs.existsSync(path.join(projectPath, 'manage.py'));
+    return {
+      type: 'python',
+      name: isDjango ? 'Python (Django)' : 'Python (FastAPI / Flask)',
+      templateEngine: isDjango ? 'Django Templates (.html / DTL)' : 'Jinja2 / API response',
+      routingModel: isDjango ? 'urls.py' : 'FastAPI/Flask route decorators (@app.get)',
+      metaHandler: 'Base HTML templates / Jinja2 blocks'
+    };
+  }
+
+  // Go (Golang / Hugo / Gin)
+  if (fs.existsSync(path.join(projectPath, 'go.mod')) || fs.existsSync(path.join(projectPath, 'hugo.toml')) || fs.existsSync(path.join(projectPath, 'config.toml'))) {
+    const isHugo = fs.existsSync(path.join(projectPath, 'hugo.toml')) || fs.existsSync(path.join(projectPath, 'config.toml'));
+    return {
+      type: 'go',
+      name: isHugo ? 'Hugo (Static Go Site)' : 'Go (Golang Web Backend)',
+      templateEngine: 'Go html/template engine',
+      routingModel: isHugo ? 'Content directory / Markdown files' : 'net/http / Gin routes',
+      metaHandler: isHugo ? 'layouts/partials/head.html' : 'HTML template header'
+    };
+  }
+
+  // Rust (Axum / Actix)
+  if (fs.existsSync(path.join(projectPath, 'Cargo.toml'))) {
+    return {
+      type: 'rust',
+      name: 'Rust (Axum / Actix-web)',
+      templateEngine: 'Askama / Tera / JSON-RPC',
+      routingModel: 'Axum / Actix router',
+      metaHandler: 'HTML templates / JSON endpoints'
+    };
+  }
+
+  // Ruby on Rails
+  if (fs.existsSync(path.join(projectPath, 'Gemfile')) && (fs.existsSync(path.join(projectPath, 'config/routes.rb')) || fs.existsSync(path.join(projectPath, 'app/views')))) {
+    return {
+      type: 'ruby-rails',
+      name: 'Ruby on Rails',
+      templateEngine: 'ERB (Embedded Ruby) / Slim / Haml',
+      routingModel: 'config/routes.rb',
+      metaHandler: 'app/views/layouts/application.html.erb'
+    };
+  }
+
+  // Java / Spring Boot
+  if (fs.existsSync(path.join(projectPath, 'pom.xml')) || (fs.existsSync(path.join(projectPath, 'build.gradle')) && fs.existsSync(path.join(projectPath, 'src/main/java')))) {
+    return {
+      type: 'java-spring',
+      name: 'Java (Spring Boot)',
+      templateEngine: 'Thymeleaf / JSP / REST API',
+      routingModel: 'Spring @RequestMapping / @GetMapping',
+      metaHandler: 'Thymeleaf layout dialect / header fragments'
+    };
+  }
+
+  // C# / .NET
+  const csprojFiles = scanFiles(['**/*.csproj'], { cwd: projectPath, ignore: ['**/node_modules/**', '**/bin/**', '**/obj/**'] });
+  if (csprojFiles.length > 0) {
+    return {
+      type: 'csharp-dotnet',
+      name: 'ASP.NET Core (.NET)',
+      templateEngine: 'Razor Pages (.cshtml) / Blazor',
+      routingModel: 'ASP.NET Core Controllers & Minimal APIs',
+      metaHandler: 'Views/Shared/_Layout.cshtml / <head>'
+    };
+  }
+
   // WordPress
   if (fs.existsSync(path.join(projectPath, 'wp-config.php')) || fs.existsSync(path.join(projectPath, 'wp-content'))) {
     return {
@@ -357,6 +430,7 @@ function detectFramework(projectPath: string): {
     routingModel: 'Generic'
   };
 }
+
 
 function detectRoutes(
   projectPath: string,

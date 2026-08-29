@@ -130,5 +130,31 @@ export function auditAeo(page: PageData): AuditIssue[] {
     });
   }
 
+  // 5. WebMCP & AI Agent Tooling Readiness
+  const hasWebMcpTag = /<link[^>]+rel=["'](?:mcp-server|mcp)["']/i.test(html) || /<meta[^>]+name=["'](?:mcp-endpoint|mcp-server)["']/i.test(html);
+  const hasClientWebMcp = /modelContext|registerTool|webmcp/i.test(html);
+
+  if (!hasWebMcpTag && !hasClientWebMcp && ['homepage', 'service', 'product', 'pricing', 'landing'].includes(page.pageType)) {
+    issues.push({
+      id: 'AEO_MISSING_WEBMCP_ENDPOINT',
+      dimension: 'aeo',
+      title: 'Missing WebMCP Endpoint for AI Search Agents & LLMs',
+      severity: 'medium',
+      priority: 'P2',
+      priorityScore: 7.2,
+      evidence: 'No <link rel="mcp-server"> or in-browser WebMCP tool registration detected in page source.',
+      evidenceType: 'confirmed',
+      filePath: page.filePath,
+      whyItMatters:
+        'Next-generation Answer Engines (Perplexity, ChatGPT, AI Overviews) invoke real-time WebMCP endpoints to query live availability, pricing, and database records directly instead of crawling stale HTML.',
+      recommendedSolution:
+        'Expose a Streamable HTTP WebMCP endpoint (/mcp) and declare <link rel="mcp-server" href="/mcp" /> in <head>.',
+      implementationApproach: 'Run `seo_generate_code_fix` with `addWebMcpDiscovery: true` or deploy the framework blueprint.',
+      expectedImpact: 'Enables autonomous AI clients and search engines to interact with live site capabilities directly.',
+      effort: 'low'
+    });
+  }
+
   return issues;
 }
+

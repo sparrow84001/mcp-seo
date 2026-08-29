@@ -18,14 +18,14 @@ jobs:
       matrix:
         target:
           - os: windows-latest
-          name: windows-x64
-          outfile: bin/mcp-seo-windows-x64.exe
+            name: windows-x64
+            outfile: bin/mcp-seo-windows-x64.exe
           - os: ubuntu-latest
-          name: linux-x64
-          outfile: bin/mcp-seo-linux-x64
+            name: linux-x64
+            outfile: bin/mcp-seo-linux-x64
           - os: macos-latest
-          name: darwin-arm64
-          outfile: bin/mcp-seo-darwin-arm64
+            name: darwin-arm64
+            outfile: bin/mcp-seo-darwin-arm64
 
     steps:
       - name: Checkout Code
@@ -110,3 +110,4 @@ jobs:
       - name: Trigger Smithery Indexer
         continue-on-error: true
         run: bunx @smithery/cli mcp publish https://mcp-seo-5d17.onrender.com -n sparrow8400/mcp-seo || true
+

@@ -83,6 +83,8 @@ export function generateMarketingStrategy(
     ],
     citationOpportunities: [
       'Publish /llms.txt with clean Markdown documentation for AI agent discovery',
+      'Expose WebMCP Streamable HTTP endpoint (/mcp) for autonomous AI agents & Perplexity',
+      'Host /.well-known/mcp/server-card.json for 1-click AI directory listings',
       'Add sameAs links to LinkedIn, Wikidata, and Crunchbase for entity authority',
       'Include author credentials with verifiable Experience & Expertise (E-E-A-T)'
     ]
@@ -102,12 +104,14 @@ export function generateMarketingStrategy(
       'Integrate client testimonials, review trust badges, and risk-reversal guarantee copy'
     ],
     days61To90: [
-      'Deploy public/llms.txt for AI search engine crawlers and agent ingestion',
+      'Deploy public/llms.txt and /.well-known/mcp/server-card.json for AI search engine crawlers',
+      'Activate Streamable HTTP WebMCP endpoint (/mcp) for agentic transactions & live search',
       'Optimize Largest Contentful Paint (LCP) and Cumulative Layout Shift (CLS) Core Web Vitals',
       'Configure IndexNow API for instant search engine indexing on new content publication',
       'Launch A/B testing on primary CTA copy and lead capture form field reductions'
     ]
   };
+
 
   // 6. High-ROI Quick Wins
   const highRoiQuickWins = allIssues

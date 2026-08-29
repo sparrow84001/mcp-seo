@@ -100,9 +100,7 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
-  const transport = new StreamableHTTPServerTransport({
-    sessionIdGenerator: () => crypto.randomUUID()
-  });
+  const transport = new StreamableHTTPServerTransport();
   await server.connect(transport);
   return transport.handleRequest(req);
 }
@@ -110,78 +108,73 @@ export async function GET(req: Request) {
 
 ---
 
-### B. Python (FastAPI / Starlette / FastMCP)
-**File:** `mcp_server.py`  
-**Dependencies:** `fastapi uvicorn mcp`
+### B. Python (FastAPI & FastMCP)
+**File:** `app/mcp_server.py`  
+**Dependencies:** `pip install "mcp[cli]" fastapi uvicorn`
 
 ```python
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from mcp.server.fastmcp import FastMCP
 
-# Initialize FastMCP Server
 mcp = FastMCP("python-web-mcp")
 
 @mcp.tool()
-def search_catalog(query: str) -> str:
-    """Search products, inventory, and documentation."""
-    return f"Python WebMCP Search Results for: {query}"
+def search_catalog(keyword: str) -> str:
+    """Search inventory catalogue for live pricing and stock status."""
+    return f"Inventory results for '{keyword}': Available in stock."
 
-# Initialize FastAPI App
-app = FastAPI(title="WebMCP Endpoint")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["mcp-session-id", "x-session-id"]
-)
-
-# Mount MCP ASGI App to /mcp
-app.mount("/mcp", mcp.streamable_http_app())
+@mcp.tool()
+def get_contact_info() -> dict:
+    """Get official contact methods and support availability."""
+    return {
+        "email": "support@example.com",
+        "phone": "+1-800-555-0199",
+        "hours": "9am - 6pm EST"
+    }
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # Start FastMCP server with Streamable HTTP transport
+    mcp.run(transport="streamable-http", port=8000)
 ```
 
 ---
 
-### C. PHP (Laravel 10 / 11 / 12)
-**File:** `app/Http/Controllers/McpController.php` & `routes/api.php`
+### C. PHP / Laravel (10, 11, 12)
+**File:** `app/Http/Controllers/McpController.php`  
+**Route:** `Route::match(['get', 'post', 'options'], '/api/mcp', [McpController::class, 'handle']);`
 
 ```php
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class McpController extends Controller
 {
+    public function serverCard()
+    {
+        return response()->json([
+            'serverInfo' => ['name' => 'laravel-web-mcp', 'version' => '1.0.0'],
+            'transport' => 'streamable-http',
+            'endpoints' => ['mcp' => '/api/mcp']
+        ])->header('Access-Control-Allow-Origin', '*');
+    }
+
     public function handle(Request $request)
     {
+        if ($request->isMethod('OPTIONS')) {
+            return response('', 200)
+                ->header('Access-Control-Allow-Origin', '*')
+                ->header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+                ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization, mcp-session-id')
+                ->header('Access-Control-Expose-Headers', 'mcp-session-id');
+        }
+
         $payload = $request->json()->all();
         $method = $payload['method'] ?? '';
         $id = $payload['id'] ?? null;
 
-        // Handle JSON-RPC initialization
-        if ($method === 'initialize') {
-            return response()->json([
-                'jsonrpc' => '2.0',
-                'id' => $id,
-                'result' => [
-                    'protocolVersion' => '2024-11-05',
-                    'serverInfo' => ['name' => 'laravel-web-mcp', 'version' => '1.0.0'],
-                    'capabilities' => ['tools' => new \stdClass()]
-                ]
-            ]);
-        }
-
-        // List Tools
         if ($method === 'tools/list') {
             return response()->json([
                 'jsonrpc' => '2.0',
@@ -189,8 +182,8 @@ class McpController extends Controller
                 'result' => [
                     'tools' => [
                         [
-                            'name' => 'search_database',
-                            'description' => 'Query site database and articles via Eloquent',
+                            'name' => 'search_laravel_catalog',
+                            'description' => 'Search products and articles in Laravel Eloquent models.',
                             'inputSchema' => [
                                 'type' => 'object',
                                 'properties' => ['keyword' => ['type' => 'string']],
@@ -199,291 +192,252 @@ class McpController extends Controller
                         ]
                     ]
                 ]
-            ]);
+            ])->header('Access-Control-Allow-Origin', '*')
+              ->header('Access-Control-Expose-Headers', 'mcp-session-id');
         }
 
-        // Call Tool
         if ($method === 'tools/call') {
             $toolName = $payload['params']['name'] ?? '';
-            $args = $payload['params']['arguments'] ?? [];
+            $keyword = $payload['params']['arguments']['keyword'] ?? '';
             return response()->json([
                 'jsonrpc' => '2.0',
                 'id' => $id,
                 'result' => [
                     'content' => [
-                        ['type' => 'text', 'text' => "Laravel MCP tool output for: " . json_encode($args)]
+                        ['type' => 'text', 'text' => "Laravel found items matching '{$keyword}'."]
                     ]
                 ]
-            ]);
+            ])->header('Access-Control-Allow-Origin', '*');
         }
 
-        return response()->json(['jsonrpc' => '2.0', 'id' => $id, 'error' => ['code' => -32601, 'message' => 'Method not found']]);
+        return response()->json([
+            'jsonrpc' => '2.0',
+            'id' => $id,
+            'error' => ['code' => -32601, 'message' => 'Method not found']
+        ], 404)->header('Access-Control-Allow-Origin', '*');
     }
 }
-```
-**Route:** `routes/api.php`
-```php
-Route::any('/mcp', [App\Http\Controllers\McpController::class, 'handle']);
 ```
 
 ---
 
 ### D. Go (Golang)
-**Dependencies:** `github.com/mark3labs/mcp-go/server`
+**File:** `main.go`  
+**Dependencies:** `go get github.com/mark3labs/mcp-go`
 
 ```go
 package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
-
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 )
 
 func main() {
-	s := server.NewMCPServer("go-web-mcp", "1.0.0")
+	s := server.NewMCPServer("golang-web-mcp", "1.0.0", server.WithToolCapabilities(true))
 
-	// Register Tool
-	tool := mcp.NewTool("search_site",
-		mcp.WithDescription("Search site catalog and articles"),
-		mcp.WithString("query", mcp.Required(), mcp.Description("Search keyword")),
+	tool := mcp.NewTool("search_inventory",
+		mcp.WithDescription("Search live inventory items."),
+		mcp.WithString("keyword", mcp.Required(), mcp.Description("Search keyword")),
 	)
 
-	s.AddTool(tool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		query, _ := request.Params.Arguments["query"].(string)
-		return mcp.NewToolResultText("Go MCP Results for: " + query), nil
+	s.AddTool(tool, func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		keyword, _ := req.Params.Arguments["keyword"].(string)
+		return mcp.NewToolResultText(fmt.Sprintf("Go inventory match: %s", keyword)), nil
 	})
 
-	// Streamable HTTP Handler
-	httpServer := server.NewStreamableHTTPServer(s)
-	http.Handle("/mcp", httpServer)
+	sseServer := server.NewSSEServer(s, "http://localhost:8080")
+	http.Handle("/sse", sseServer.HandleSSE())
+	http.Handle("/message", sseServer.HandleMessage())
+
+	fmt.Println("🚀 Go WebMCP Server running on :8080")
 	http.ListenAndServe(":8080", nil)
 }
 ```
 
 ---
 
-### E. Rust (Axum / Tokio)
-**Dependencies:** `axum tokio serde_json`
+### E. Rust (Axum)
+**File:** `src/main.rs`  
+**Dependencies:** `axum tokio serde serde_json`
 
 ```rust
-use axum::{routing::post, Json, Router};
+use axum::{routing::{get, post}, Json, Router};
 use serde_json::{json, Value};
 use std::net::SocketAddr;
 
-async fn mcp_handler(Json(payload): Json<Value>) -> Json<Value> {
-    let method = payload.get("method").and_then(|m| m.as_str()).unwrap_or("");
-    let id = payload.get("id").cloned().unwrap_or(json!(null));
+#[tokio::main]
+async fn main() {
+    let app = Router::new()
+        .route("/mcp", post(handle_mcp))
+        .route("/.well-known/mcp/server-card.json", get(server_card));
 
-    match method {
-        "initialize" => Json(json!({
-            "jsonrpc": "2.0",
-            "id": id,
-            "result": {
-                "protocolVersion": "2024-11-05",
-                "serverInfo": { "name": "rust-web-mcp", "version": "1.0.0" },
-                "capabilities": { "tools": {} }
-            }
-        })),
-        "tools/list" => Json(json!({
+    let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
+    println!("🦀 Rust WebMCP Server running on {}", addr);
+    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
+    axum::serve(listener, app).await.unwrap();
+}
+
+async fn server_card() -> Json<Value> {
+    Json(json!({
+        "serverInfo": { "name": "rust-web-mcp", "version": "1.0.0" },
+        "transport": "streamable-http",
+        "endpoints": { "mcp": "/mcp" }
+    }))
+}
+
+async fn handle_mcp(Json(payload): Json<Value>) -> Json<Value> {
+    let method = payload.get("method").and_then(Value::as_str).unwrap_or("");
+    let id = payload.get("id").cloned().unwrap_or(Value::Null);
+
+    if method == "tools/list" {
+        return Json(json!({
             "jsonrpc": "2.0",
             "id": id,
             "result": {
                 "tools": [{
-                    "name": "rust_fast_search",
-                    "description": "Blazing fast Rust in-memory index search",
-                    "inputSchema": {
-                        "type": "object",
-                        "properties": { "query": { "type": "string" } },
-                        "required": ["query"]
-                    }
+                    "name": "lookup_rust_data",
+                    "description": "High performance Rust backend tool.",
+                    "inputSchema": { "type": "object" }
                 }]
             }
-        })),
-        _ => Json(json!({
-            "jsonrpc": "2.0",
-            "id": id,
-            "error": { "code": -32601, "message": "Method not found" }
-        }))
+        }));
     }
-}
-
-#[tokio::main]
-async fn main() {
-    let app = Router::new().route("/mcp", post(mcp_handler));
-    let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
-    axum::Server::bind(&addr).serve(app.into_make_service()).await.unwrap();
+    Json(json!({ "jsonrpc": "2.0", "id": id, "error": { "code": -32601, "message": "Method not found" } }))
 }
 ```
 
 ---
 
-### F. C# / ASP.NET Core (.NET 8/9 Minimal APIs)
-```csharp
-var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddCors(options => {
-    options.AddPolicy("AllowAll", p => p.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-});
+### F. Client-Side In-Browser DOM WebMCP & Static JAMstack (Astro, Svelte, Hugo, HTML)
+**File:** `public/webmcp.js` (or in `<head>`):
 
-var app = builder.Build();
-app.UseCors("AllowAll");
-
-app.MapPost("/mcp", async (HttpContext context) => {
-    using var reader = new StreamReader(context.Request.Body);
-    var json = await reader.ReadToEndAsync();
-    var doc = System.Text.Json.JsonDocument.Parse(json);
-    var method = doc.RootElement.GetProperty("method").GetString();
-    var id = doc.RootElement.GetProperty("id");
-
-    if (method == "initialize") {
-        return Results.Json(new {
-            jsonrpc = "2.0",
-            id = id,
-            result = new {
-                protocolVersion = "2024-11-05",
-                serverInfo = new { name = "dotnet-web-mcp", version = "1.0.0" },
-                capabilities = new { tools = new { } }
-            }
-        });
-    }
-
-    if (method == "tools/list") {
-        return Results.Json(new {
-            jsonrpc = "2.0",
-            id = id,
-            result = new {
-                tools = new[] {
-                    new {
-                        name = "dotnet_query",
-                        description = "Query ASP.NET EntityFramework DB",
-                        inputSchema = new { type = "object", properties = new { q = new { type = "string" } } }
-                    }
-                }
-            }
-        });
-    }
-
-    return Results.Json(new { jsonrpc = "2.0", id = id, error = new { code = -32601, message = "Method not found" } });
-});
-
-app.Run();
-```
-
----
-
-### G. Java / Spring Boot 3
-```java
-@RestController
-@CrossOrigin(origins = "*", exposedHeaders = {"mcp-session-id", "x-session-id"})
-public class McpController {
-
-    @PostMapping(value = "/mcp", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Map<String, Object> handleMcp(@RequestBody Map<String, Object> payload) {
-        String method = (String) payload.get("method");
-        Object id = payload.get("id");
-
-        if ("initialize".equals(method)) {
-            return Map.of(
-                "jsonrpc", "2.0",
-                "id", id,
-                "result", Map.of(
-                    "protocolVersion", "2024-11-05",
-                    "serverInfo", Map.of("name", "spring-boot-mcp", "version", "1.0.0"),
-                    "capabilities", Map.of("tools", Map.of())
-                )
-            );
-        }
-
-        if ("tools/list".equals(method)) {
-            return Map.of(
-                "jsonrpc", "2.0",
-                "id", id,
-                "result", Map.of(
-                    "tools", List.of(
-                        Map.of(
-                            "name", "spring_jpa_search",
-                            "description", "Search JPA repositories",
-                            "inputSchema", Map.of("type", "object")
-                        )
-                    )
-                )
-            );
-        }
-
-        return Map.of("jsonrpc", "2.0", "id", id, "error", Map.of("code", -32601, "message", "Method not found"));
-    }
-}
-```
-
----
-
-### H. Ruby on Rails
-```ruby
-# app/controllers/mcp_controller.rb
-class McpController < ApplicationController
-  skip_before_action :verify_authenticity_token
-
-  def handle
-    payload = JSON.parse(request.body.read)
-    method = payload["method"]
-    id = payload["id"]
-
-    case method
-    when "initialize"
-      render json: {
-        jsonrpc: "2.0",
-        id: id,
-        result: {
-          protocolVersion: "2024-11-05",
-          serverInfo: { name: "rails-web-mcp", version: "1.0.0" },
-          capabilities: { tools: {} }
-        }
-      }
-    when "tools/list"
-      render json: {
-        jsonrpc: "2.0",
-        id: id,
-        result: {
-          tools: [{
-            name: "rails_activerecord_query",
-            description: "Query Rails ActiveRecord models",
-            inputSchema: { type: "object" }
-          }]
-        }
-      }
-    else
-      render json: { jsonrpc: "2.0", id: id, error: { code: -32601, message: "Method not found" } }
-    end
-  end
-end
-```
-
----
-
-### I. Static HTML / Client-Side DOM WebMCP
 ```html
+<link rel="mcp-server" href="/mcp" />
 <script>
-window.webmcp = {
-  version: "1.0.0",
-  tools: [
+(function() {
+  if (typeof window === 'undefined') return;
+
+  window.modelContext = window.modelContext || {
+    tools: [],
+    registerTool: function(toolDef) {
+      this.tools.push(toolDef);
+      console.log('[WebMCP] Registered in-browser tool:', toolDef.name);
+    }
+  };
+
+  // Register client-side browser interactive tool
+  window.modelContext.registerTool({
+    name: 'filter_catalog_ui',
+    description: 'Filter catalogue items and update DOM in real-time without page reload.',
+    parameters: {
+      type: 'object',
+      properties: {
+        keyword: { type: 'string', description: 'Keyword to search on the page' }
+      },
+      required: ['keyword']
+    },
+    execute: async function(args) {
+      const searchBox = document.querySelector('input[type="search"], input[name="q"]');
+      if (searchBox) {
+        searchBox.value = args.keyword;
+        searchBox.dispatchEvent(new Event('input', { bubbles: true }));
+        return { status: 'success', message: 'Filter applied for: ' + args.keyword };
+      }
+      return { status: 'error', message: 'Search box element not found' };
+    }
+  });
+})();
+</script>
+```
+
+---
+
+## 📡 3. Discovery Standards & Grounding
+
+To ensure AI search engines and agents automatically discover your WebMCP server:
+
+### 1. `/.well-known/mcp/server-card.json`
+Place in your `public/` folder:
+```json
+{
+  "serverInfo": {
+    "name": "my-site-mcp",
+    "version": "1.0.0",
+    "description": "Live tool and search API for AI browsing agents."
+  },
+  "authentication": {
+    "required": false
+  },
+  "transport": "streamable-http",
+  "endpoints": {
+    "mcp": "/mcp",
+    "sse": "/sse"
+  },
+  "tools": [
     {
-      name: "highlight_pricing_tier",
-      description: "Highlights the recommended pricing tier plan on the page.",
-      parameters: { planName: "string" },
-      execute: function(args) {
-        document.querySelectorAll('.tier-card').forEach(el => el.classList.remove('highlight'));
-        const target = document.querySelector(`.tier-card[data-plan="${args.planName}"]`);
-        if (target) {
-          target.classList.add('highlight');
-          target.scrollIntoView({ behavior: 'smooth' });
-          return { success: true, message: `Highlighted ${args.planName}` };
-        }
-        return { success: false, message: "Plan not found" };
+      "name": "search_site_content",
+      "description": "Search articles, documentation, products, and services.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string", "description": "Search keyword" }
+        },
+        "required": ["query"]
       }
     }
   ]
-};
-</script>
+}
 ```
+
+### 2. HTML Discovery Tag
+In your `<head>` section:
+```html
+<link rel="mcp-server" href="/mcp" />
+```
+
+### 3. `/llms.txt`
+In `public/llms.txt`:
+```markdown
+# My Website
+
+> Official documentation, products, and services.
+
+## WebMCP AI Agent Endpoints
+* MCP Streamable HTTP: `/mcp`
+* Discovery Manifest: `/.well-known/mcp/server-card.json`
+* Protocol: https://modelcontextprotocol.io/docs/transports/streamable-http
+```
+
+---
+
+## 🩺 4. Common Problems, Diagnostic Checklist & Fixes
+
+| Problem / Failure Mode | Diagnostic Indicator | Why It Happens | Exact Fix |
+| :--- | :--- | :--- | :--- |
+| **CORS Blocked** | Browser console error: `No Access-Control-Allow-Origin` | AI agent running in a browser environment cannot reach endpoint. | Set `Access-Control-Allow-Origin: *` and expose `mcp-session-id`. |
+| **DNS Rebinding Attack Risk** | Warning on public endpoints | Local endpoints vulnerable to unauthorized origin requests. | Validate `Origin` header to match allowed domains. |
+| **Missing Discovery Link** | AI crawlers fail to find tools | No `<link rel="mcp-server">` in HTML `<head>`. | Run `seo_generate_code_fix` with `addWebMcpDiscovery: true`. |
+| **JSON-RPC Schema Error** | Error code `-32600` or `-32602` | Arguments sent do not match the declared `inputSchema`. | Use `zod` or JSON-Schema validator to validate request parameters. |
+| **Broken SSE Keepalive** | Connection drops after 30-60s | Reverse proxy (Cloudflare, Nginx) terminates idle HTTP connections. | Send comment keepalive ping (`:\n\n` or `event: ping`) every 15-30 seconds. |
+
+---
+
+## 🧪 5. Testing & Verification
+
+Run the automated verification tool anytime:
+```json
+{
+  "tool": "seo_test_web_mcp",
+  "arguments": {
+    "url": "https://your-website.com",
+    "targetLanguage": "typescript-node"
+  }
+}
+```
+Or run the interactive prompt in chat:
+> *"Audit WebMCP support and generate implementation fixes using `webmcp_implementation_and_fix`."*
+

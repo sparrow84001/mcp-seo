@@ -111,10 +111,19 @@ describe('Related Web Ecosystem & Competitor Suggestion Engine', () => {
     expect(result.authorityDirectoryProspects.some((p) => p.platformName.includes('Better Business Bureau'))).toBeTrue();
   });
 
-  it('correctly audits Web MCP support and generates enablement snippets', async () => {
-    const { testWebMcpSupport, formatWebMcpTestToMarkdown } = await import('../src/analyzer/web-mcp-detector.ts');
+  it('correctly audits Web MCP support, diagnostics, and generates multi-language blueprints', async () => {
+    const { testWebMcpSupport, formatWebMcpTestToMarkdown, getMultiLanguageBlueprints } = await import(
+      '../src/analyzer/web-mcp-detector.ts'
+    );
 
-    const htmlWithMcp = '<html><head><link rel="mcp-server" href="/api/mcp/sse"></head><body><h1>Welcome</h1></body></html>';
+    const blueprints = getMultiLanguageBlueprints();
+    expect(blueprints['nextjs-app']).toBeDefined();
+    expect(blueprints['python-fastapi']).toBeDefined();
+    expect(blueprints['php-laravel']).toBeDefined();
+    expect(blueprints['go']).toBeDefined();
+    expect(blueprints['rust']).toBeDefined();
+
+    const htmlWithMcp = '<html><head><link rel="mcp-server" href="/mcp"></head><body><h1>Welcome</h1></body></html>';
     const pageData: PageData = {
       url: 'https://mysite.com',
       rawHtml: htmlWithMcp,
@@ -133,14 +142,17 @@ describe('Related Web Ecosystem & Competitor Suggestion Engine', () => {
       pageType: 'landing'
     };
 
-    const result = await testWebMcpSupport('https://mysite.com', pageData);
+    const result = await testWebMcpSupport('https://mysite.com', pageData, undefined, 'python-fastapi');
     expect(result.isWebMcpEnabled).toBeTrue();
-    expect(result.detectedEndpoints.sseEndpoint).toBe('https://mysite.com/api/mcp/sse');
+    expect(result.detectedEndpoints.streamableEndpoint).toBe('https://mysite.com/mcp');
     expect(result.enablementGuide.stepsToEnable.length).toBeGreaterThan(2);
+    expect(result.diagnostics.length).toBeGreaterThanOrEqual(3);
 
-    const markdown = formatWebMcpTestToMarkdown(result);
-    expect(markdown).toContain('WEB MCP ACTIVE & ENABLED');
-    expect(markdown).toContain('https://mysite.com/api/mcp/sse');
+    const markdown = formatWebMcpTestToMarkdown(result, 'python-fastapi');
+    expect(markdown).toContain('WEB MCP ACTIVE & COMPLIANT');
+    expect(markdown).toContain('FastAPI');
+    expect(markdown).toContain('https://mysite.com/mcp');
   });
 });
+
 
