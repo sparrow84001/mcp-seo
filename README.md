@@ -1,7 +1,7 @@
 # SEO, AEO, GEO & Digital Marketing Audit + Safe Fix MCP Server
 
 [![CI & PR Validation](https://github.com/sparrow84001/mcp-seo/actions/workflows/ci.yml/badge.svg)](https://github.com/sparrow84001/mcp-seo/actions/workflows/ci.yml)
-[![Version](https://img.shields.io/badge/version-1.0.4-blue.svg)](https://github.com/sparrow84001/mcp-seo)
+[![Version](https://img.shields.io/badge/version-1.0.5-blue.svg)](https://github.com/sparrow84001/mcp-seo)
 [![TypeScript](https://img.shields.io/badge/TypeScript-7.0.2-blue.svg)](https://www.typescriptlang.org/)
 [![Bun](https://img.shields.io/badge/Bun-1.4.0-black.svg)](https://bun.sh)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
@@ -10,7 +10,7 @@
 An advanced, AI-powered Model Context Protocol (MCP) server that acts as a comprehensive **Growth Auditor, Search & AI Engine Optimizer, and Framework-Aware Code Fixer**.
 
 > **Developed by:** **Sayanta Neogi** ([@sparrow84001](https://github.com/sparrow84001)) • 📧 [sparrow8400@gmail.com](mailto:sparrow8400@gmail.com)  
-> **Repository:** [github.com/sparrow84001/mcp-seo](https://github.com/sparrow84001/mcp-seo) • **Version:** `1.0.4`
+> **Repository:** [github.com/sparrow84001/mcp-seo](https://github.com/sparrow84001/mcp-seo) • **Version:** `1.0.5`
 
 Designed for seamless integration with **Antigravity 2.0**, **GitHub Copilot**, **Claude Desktop**, **Cursor**, and **Windsurf**. Built with **TypeScript 7** and powered by **Bun 1.4**.
 
@@ -49,102 +49,64 @@ Designed for seamless integration with **Antigravity 2.0**, **GitHub Copilot**, 
 
 ---
 
-## Installation & Setup
+## 🛠️ Complete MCP Tool Suite (19 Tools)
 
-### Prerequisites
-* [Bun](https://bun.sh) (v1.1+) installed.
-
-### Quick Start
-
-```bash
-# Clone and install dependencies
-cd /path/to/mcp-seo
-bun install
-
-# Run test suite
-bun test
-
-# Build executable bundle
-bun run build
-
-# Compile standalone native binary (zero dependencies)
-bun run compile
-
-# Start MCP server directly
-bun start
-```
-
-> [!TIP]
-> **Standalone Executable Available:** You can compile a single standalone `.exe` using `bun run compile` which runs without requiring Bun or Node.js on the host machine. See [EXE_USAGE_GUIDE.md](./EXE_USAGE_GUIDE.md) for setup instructions.
+| Tool Name | Dimension | Description |
+| :--- | :--- | :--- |
+| `seo_discover_project` | Architecture | Discovers website framework, detected routes, sitemaps, robots, llms.txt, and page inventory. |
+| `seo_crawl_and_extract` | Extraction | Crawls live URLs or reads local source files to extract SEO metadata, headings, schemas, and links. |
+| `seo_audit_technical` | Technical | Audits canonicals, robots.txt, XML sitemaps, noindex directives, viewport, charset, and status codes. |
+| `seo_audit_onpage` | On-Page | Audits titles, meta descriptions, single H1 enforcement, heading hierarchies, OpenGraph, and Twitter cards. |
+| `seo_audit_aeo` | AEO | Audits Google AI Overviews & Perplexity citations, question subheadings, and 40-60 word definition blocks. |
+| `seo_audit_geo` | GEO | Audits brand clarity, Schema.org Organization/Person entities, and `sameAs` knowledge graph links. |
+| `seo_audit_local` | Local SEO | Audits LocalBusiness JSON-LD, NAP consistency, map pack signals, and flags duplicated city landing pages. |
+| `seo_audit_content` | Content | Evaluates content quality, word count depth, search intent (informational, commercial, transactional), and reading ease. |
+| `seo_audit_conversion` | CRO | Audits high-contrast CTAs, form friction, social proof review badges, mobile floating action buttons, and risk reversal. |
+| `seo_audit_performance`| Performance | Audits Core Web Vitals risks: unoptimized image weights, missing width/height attributes, and heavy render-blocking scripts. |
+| `seo_audit_schema` | Structured Data | Validates Schema.org JSON-LD structured data coverage, schema types, and syntax correctness. |
+| `seo_audit_internal_links` | Internal Links | Audits internal linking graph, contextual links between blogs and services, and descriptive anchor text. |
+| `seo_generate_full_audit` | Full Audit | Generates an 8-dimension weighted scorecard, letter grades, P0-P3 prioritized action items, and 5-phase growth plan. |
+| `seo_generate_marketing_strategy` | Growth | Formulates a high-impact digital marketing strategy, CRO roadmap, and 30-60-90 day execution milestones. |
+| `seo_suggest_related_ecosystem` | Ecosystem | Discovers related market vertical, benchmark competitors, directory/backlink targets, and keyword topic clusters. |
+| `seo_test_web_mcp` | Web MCP | Tests live websites for Web MCP enablement (Streamable HTTP, SSE, DOM tools) and provides language blueprints. |
+| `seo_audit_sitemap_multipage` | Sitemap & Security | Crawls all sitemap registered URLs, evaluates robots permissions, audits HTTP security headers (HSTS, CSP), and aggregates site-wide scorecard. |
+| `seo_audit_robots_and_sitemap` | Robots & Security | Inspects robots.txt rules, sitemap index validity, and HTTP security headers. |
+| `seo_generate_sitemap_and_robots` | Generator | Generates production-ready sitemap.xml and robots.txt configuration files. |
+| `seo_generate_code_fix`| Safe Fixer | Generates surgical code fixes with unified diffs for Blade, Next.js, Astro, PHP, and HTML. |
+| `seo_validate_code_fix`| Validator | Validates modified source files against syntax errors, duplicate tags, and computes Before vs After score improvements. |
 
 ---
 
-## Client Configurations
+## 💻 Installation & Usage
 
-### 1. Antigravity 2.0 (`agy`) Configuration
-
-Add the server to your Antigravity global configuration or workspace `.agy/mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "seo-auditor": {
-      "command": "bun",
-      "args": ["/path/to/mcp-seo/src/index.ts"]
-    }
-  }
-}
+### 1. Global Installation (via npm/bun)
+```bash
+bun add -g @sparrow84001/mcp-seo
+# Or with npm:
+npm install -g @sparrow84001/mcp-seo
 ```
 
-### 2. GitHub Copilot / VS Code MCP Configuration
-
-In `.vscode/settings.json` (or `.codeium/mcp.json`):
-
-```json
-{
-  "github.copilot.chat.mcpServers": {
-    "seo-auditor": {
-      "command": "bun",
-      "args": ["/path/to/mcp-seo/src/index.ts"]
-    }
-  }
-}
+### 2. Run via npx / bunx
+```bash
+npx @sparrow84001/mcp-seo
+# Or with bun:
+bunx @sparrow84001/mcp-seo
 ```
 
-To guide Copilot directly, add this to `.github/copilot-instructions.md`:
-```markdown
-When performing SEO or website audits, always use the `seo-auditor` MCP tools:
-1. Run `seo_discover_project` first to understand the framework.
-2. Run `seo_generate_full_audit` to get 0-100 scores and P0-P3 prioritized actions.
-3. Show unified diffs with `seo_generate_code_fix` and request user approval before modifying code.
-4. Verify with `seo_validate_code_fix` after applying fixes.
-```
+### 3. Precompiled Standalone Executable (Zero Dependencies)
+Download `mcp-seo.exe` directly from the [GitHub Releases](https://github.com/sparrow84001/mcp-seo/releases) page.
 
-### 3. Claude Desktop Configuration
+---
 
-Add to `%APPDATA%/Claude/claude_desktop_config.json` (Windows) or `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS):
+## ⚙️ Configuration
 
+### Antigravity 2.0 / Claude Desktop / Cursor (`claude_desktop_config.json`)
 ```json
 {
   "mcpServers": {
     "seo-growth-auditor": {
-      "command": "bun",
-      "args": ["/path/to/mcp-seo/src/index.ts"]
-    }
-  }
-}
-```
-
-### 4. Cursor Configuration
-
-Add to `.cursor/mcp.json` in your project root:
-
-```json
-{
-  "mcpServers": {
-    "seo-auditor": {
-      "command": "bun",
-      "args": ["/path/to/mcp-seo/src/index.ts"]
+      "command": "bunx",
+      "args": ["@sparrow84001/mcp-seo"]
     }
   }
 }
@@ -152,93 +114,7 @@ Add to `.cursor/mcp.json` in your project root:
 
 ---
 
-## MCP Tools Reference
+## 📄 License & Author
 
-| Tool Name | Purpose | Key Inputs |
-| :--- | :--- | :--- |
-| `seo_discover_project` | Detects framework, routing model, sitemaps, robots.txt, llms.txt, page inventory | `projectPath` |
-| `seo_crawl_and_extract` | Extracts title, meta, canonical, headings, links, schemas, images from file/URL | `target`, `pageType?` |
-| `seo_audit_technical` | Checks canonicals, robots.txt, meta robots noindex/nofollow, sitemaps, mixed content | `target`, `projectPath?` |
-| `seo_audit_onpage` | Evaluates title length/CTR, meta description, H1-H6 hierarchy, OpenGraph/Twitter | `target` |
-| `seo_audit_aeo` | Audits direct answer blocks, question headings (What/How), FAQ schema, llms.txt | `target` |
-| `seo_audit_geo` | Audits Organization/Person entities, sameAs reconciliation, E-E-A-T credentials | `target` |
-| `seo_audit_local` | Audits LocalBusiness schema, NAP consistency, click-to-call, city page duplication | `target` |
-| `seo_audit_content` | Classifies search intent (Informational, Commercial, Transactional), thin content risk | `target` |
-| `seo_audit_conversion`| Audits primary/secondary CTAs, lead capture forms, WhatsApp/Phone, social proof | `target` |
-| `seo_audit_performance`| Identifies code-level CLS (missing img dimensions), LCP (legacy formats), blocking JS | `target` |
-| `seo_audit_schema` | Validates Schema.org JSON-LD syntax and missing schemas by page type | `target` |
-| `seo_audit_internal_links` | Builds link graph, detects orphan pages, generic anchor text, suggests contextual links | `target` |
-| `seo_generate_full_audit` | Consolidates all 8 dimensions into weighted 0-100 scores, P0-P3 matrix, and Markdown report | `target`, `projectPath?` |
-| `seo_suggest_related_ecosystem` | Discovers related website ecosystems, infers market niche, benchmark competitors, directory/citation targets & keyword clusters | `target` |
-| `seo_test_web_mcp` | Tests a live website to check if Web MCP is enabled, extracts active exposed tools, and provides enablement recommendations | `url` |
-| `seo_generate_marketing_strategy` | Formulates high-ROI digital marketing growth blueprint, CRO plan, AEO strategy & 30-60-90 day roadmap | `target`, `projectPath?` |
-| `seo_generate_code_fix` | Framework-aware code generation (Laravel Blade, Next.js, Astro, HTML) with unified diff | `filePath`, `title?`, `metaDescription?`, `canonicalUrl?`, `jsonLdSchema?`, `applyDirectly?` |
-| `seo_validate_code_fix` | Post-fix validation: checks duplicate tags, JSON-LD syntax, Before/After score diff | `filePath`, `beforeScores?` |
-
----
-
-## 🌐 Web MCP (HTTP & SSE Stream Server)
-
-In addition to standard CLI stdio mode, MCP-SEO can be run as a **live Web MCP Server** over HTTP/SSE for remote AI clients, cloud hosting, and web dashboards:
-
-```bash
-# Start Web MCP Server (default port: 3000)
-bun run start:http
-
-# Custom port and host
-bun run src/index.ts --http --port 8080 --host 0.0.0.0
-```
-
-* **SSE Stream:** `GET http://localhost:3000/sse`
-* **JSON-RPC Message:** `POST http://localhost:3000/message?sessionId=<id>`
-* **Health Check:** `GET http://localhost:3000/health`
-* **Status Dashboard:** `http://localhost:3000/`
-
-👉 See full guide: **[WEB_MCP_GUIDE.md](./WEB_MCP_GUIDE.md)** for Railway, Render, Fly.io, and Docker deployment.
-
----
-
-## MCP Prompts Reference
-
-1. **`seo_full_audit`**: Guides the AI through the complete 12-step audit workflow from discovery to reporting.
-2. **`digital_marketing_growth_strategy`**: Synthesizes audit findings into a high-impact digital marketing growth blueprint with CRO levers, AI answer engine tactics, audience mapping, and a 30-60-90 day execution roadmap.
-3. **`related_ecosystem_and_competitor_analysis`**: Analyzes market vertical, competitor benchmarks, directory backlink prospects, and keyword topic clusters.
-4. **`seo_code_fix_workflow`**: Step-by-step guidance for surgical code fixes with approval checkpoints.
-5. **`aeo_geo_optimization`**: Deep optimization for Generative Engines and AI Answer Engines.
-6. **`local_seo_boost`**: Dedicated optimization for local and multi-location businesses.
-
----
-
-## Standard 12-Step Audit Workflow
-
-```
-1. DISCOVER  ➔  2. CRAWL  ➔  3. ANALYZE (8 Dimensions)  ➔  4. IDENTIFY PROBLEMS
-       ▲                                                              │
-       │                                                              ▼
-12. REPORT  ▲  11. RE-AUDIT  ▲  10. APPLY FIX  ▲  9. APPROVAL  ◄  5. PRIORITIZE
-```
-
----
-
-## MCP Registry & Community Hubs
-
-This server is packaged and ready for the **Official Model Context Protocol Registry** and community directories:
-
-* **Official MCP Registry:** Follow the 4-step publishing process with `server.json` via [MCP_REGISTRY_SUBMISSION_GUIDE.md](./MCP_REGISTRY_SUBMISSION_GUIDE.md).
-* **Smithery.ai & Glama.ai:** Ready for 1-click indexing.
-
----
-
-## 👨‍💻 Author & Credits
-
-* **Author / Developer:** **Sayanta Neogi**
-* **GitHub Profile:** [@sparrow84001](https://github.com/sparrow84001)
-* **Email:** [sparrow8400@gmail.com](mailto:sparrow8400@gmail.com)
-* **Project Repository:** [https://github.com/sparrow84001/mcp-seo](https://github.com/sparrow84001/mcp-seo)
-* **Current Version:** `1.0.4`
-
----
-
-## License
-
-MIT License © 2026 Sayanta Neogi. Developed for Antigravity, GitHub Copilot, and Claude AI Ecosystems.
+* **License:** MIT License • Copyright (c) 2026 **Sayanta Neogi**
+* **Author:** Sayanta Neogi ([@sparrow84001](https://github.com/sparrow84001)) • 📧 [sparrow8400@gmail.com](mailto:sparrow8400@gmail.com)
