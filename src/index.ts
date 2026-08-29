@@ -853,9 +853,10 @@ function startHttpServer(port: number = 3000, host: string = '0.0.0.0') {
 
     if (url.pathname === '/health') {
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ status: 'ok', uptime: process.uptime(), version: '1.0.4' }));
+      res.end(JSON.stringify({ status: 'ok', uptime: process.uptime(), version: '1.0.5' }));
       return;
     }
+
 
     if (url.pathname === '/info') {
       res.writeHead(200, { 'Content-Type': 'application/json' });
