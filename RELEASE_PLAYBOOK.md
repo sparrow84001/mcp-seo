@@ -91,4 +91,6 @@ After pushing the tag `vX.Y.Z`, verify that:
    - Release `vX.Y.Z` created with 3 attached standalone binaries (`windows-x64.exe`, `linux-x64`, `darwin-arm64`).
 3. **Official MCP Registry:** Auto-published via GitHub OIDC token.
 4. **Smithery.ai Indexer:** Triggered for `sparrow8400/mcp-seo`.
-5. **Render Cloud Server:** `https://mcp-seo-5dl7.onrender.com/health` returns `200 OK` with the new version.
+5. **Glama.ai Directory:** Automatically syncs with GitHub repo (`sparrow84001/mcp-seo`) and polls the live connector (`https://mcp-seo-5dl7.onrender.com/mcp`).
+6. **Render Cloud Server:** `https://mcp-seo-5dl7.onrender.com/health` returns `200 OK` with the new version.
+
