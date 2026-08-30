@@ -874,40 +874,61 @@ function startHttpServer(port: number = 3000, host: string = '0.0.0.0') {
       return;
     }
 
-    if (url.pathname === '/.well-known/mcp/server-card.json') {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({
-        serverInfo: {
-          name: 'mcp-seo',
-          version: '1.0.5',
-          description: 'SEO, AEO, GEO, Local SEO & CRO Growth Auditor + Safe Code Fixer'
-        },
-        authentication: { required: false },
-        tools: [
-          { name: 'seo_discover_project', description: 'Discovers website framework, routes, sitemaps, robots, llms.txt and page inventory.', inputSchema: { type: 'object', properties: { projectPath: { type: 'string' } }, required: ['projectPath'] } },
-          { name: 'seo_crawl_and_extract', description: 'Crawls a live URL or reads a local file to extract SEO signals and page metadata.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
-          { name: 'seo_audit_technical', description: 'Audits technical SEO foundations: canonicals, robots, sitemaps, indexing directives.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
-          { name: 'seo_audit_onpage', description: 'Audits on-page SEO: title, meta description, heading hierarchy, content length.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
-          { name: 'seo_audit_aeo', description: 'Audits Answer Engine Optimization for Google AI Overviews and Perplexity citations.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
-          { name: 'seo_audit_geo', description: 'Audits Generative Engine Optimization: brand clarity, entity schema, topical authority.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
-          { name: 'seo_audit_local', description: 'Audits Local SEO signals: NAP, local business schema, geographic landing pages.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
-          { name: 'seo_audit_content', description: 'Evaluates content quality, informational depth, and search intent alignment.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
-          { name: 'seo_audit_conversion', description: 'Audits conversion optimization (CRO): call-to-action visibility, form usability, trust signals.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
-          { name: 'seo_audit_performance', description: 'Audits Core Web Vitals risk factors: unoptimized images, heavy scripts, render-blocking resources.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
-          { name: 'seo_audit_schema', description: 'Validates Schema.org structured data JSON-LD coverage and correctness.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
-          { name: 'seo_audit_internal_links', description: 'Audits internal linking structure, anchor text, and navigation links.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
-          { name: 'seo_generate_full_audit', description: 'Runs a comprehensive 8-dimension SEO, AEO, GEO, Local, Content, and Performance audit report.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
-          { name: 'seo_generate_marketing_strategy', description: 'Generates a strategic digital marketing plan, CRO levers, and prioritized 30-60-90 day growth roadmap.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
-          { name: 'seo_suggest_related_ecosystem', description: 'Discovers related website ecosystems, infers market vertical & competitor archetypes, suggests high-authority directories, and generates keyword clusters.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
-          { name: 'seo_test_web_mcp', description: 'Tests a live website to check if Web MCP is enabled, extracts active exposed tools, and provides enablement recommendations.', inputSchema: { type: 'object', properties: { url: { type: 'string' } }, required: ['url'] } },
-          { name: 'seo_audit_sitemap_multipage', description: 'Crawls all sitemap registered URLs, checks robots allow/disallow permissions, audits security headers (HSTS), and aggregates site-wide health scorecard.', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
-          { name: 'seo_audit_robots_and_sitemap', description: 'Inspects robots.txt rules, sitemap index validity, and HTTP security headers (HSTS, CSP).', inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] } },
-          { name: 'seo_generate_sitemap_and_robots', description: 'Generates production-ready sitemap.xml and robots.txt files.', inputSchema: { type: 'object', properties: { targetUrl: { type: 'string' } }, required: ['targetUrl'] } }
-        ],
-        resources: [],
-        prompts: []
-      }));
-      return;
+    if (url.pathname === '/api/audit' || url.pathname === '/audit') {
+      res.setHeader('Content-Type', 'application/json');
+
+      const handleAudit = async (target: string) => {
+        try {
+          if (!target) {
+            res.writeHead(400);
+            res.end(JSON.stringify({ error: 'Missing target URL or path' }));
+            return;
+          }
+
+          const pageData = await crawlUrlOrFile(target);
+          const allIssues: AuditIssue[] = [
+            ...auditTechnicalSeo(pageData),
+            ...auditOnPageSeo(pageData),
+            ...auditAeo(pageData),
+            ...auditGeo(pageData),
+            ...auditLocalSeo(pageData),
+            ...evaluateContentQuality(pageData).issues,
+            ...auditConversion(pageData),
+            ...auditPerformanceRisks(pageData),
+            ...auditSchema(pageData),
+            ...auditInternalLinks(pageData).issues
+          ];
+
+          const report = generateAuditReport(target, pageData, allIssues);
+          res.writeHead(200);
+          res.end(JSON.stringify({ success: true, report, pageData }));
+        } catch (err: any) {
+          res.writeHead(500);
+          res.end(JSON.stringify({ error: err.message || 'Audit execution failed' }));
+        }
+      };
+
+      if (req.method === 'GET') {
+        const target = url.searchParams.get('target') || url.searchParams.get('url') || '';
+        await handleAudit(target);
+        return;
+      }
+
+      if (req.method === 'POST') {
+        let rawBody = '';
+        req.on('data', (chunk) => (rawBody += chunk));
+        req.on('end', async () => {
+          try {
+            const body = JSON.parse(rawBody || '{}');
+            const target = body.target || body.url || '';
+            await handleAudit(target);
+          } catch {
+            res.writeHead(400);
+            res.end(JSON.stringify({ error: 'Invalid JSON request body' }));
+          }
+        });
+        return;
+      }
     }
 
 
