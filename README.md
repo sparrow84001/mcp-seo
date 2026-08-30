@@ -49,7 +49,7 @@ Designed for seamless integration with **Antigravity 2.0**, **GitHub Copilot**, 
 
 ---
 
-## 🛠️ Complete MCP Tool Suite (19 Tools)
+## 🛠️ Complete MCP Tool Suite (21 Tools)
 
 | Tool Name | Dimension | Description |
 | :--- | :--- | :--- |

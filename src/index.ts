@@ -868,7 +868,7 @@ function startHttpServer(port: number = 3000, host: string = '0.0.0.0') {
           description: 'SEO, AEO, GEO, Local SEO & CRO Growth Auditor + Safe Code Fixer',
           transport: 'streamable-http',
           endpoints: { mcp: '/mcp', sse: '/sse', message: '/message', health: '/health' },
-          toolsCount: 19
+          toolsCount: 21
         })
       );
       return;
