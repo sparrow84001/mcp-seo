@@ -879,7 +879,7 @@ function startHttpServer(port: number = 3000, host: string = '0.0.0.0') {
       res.end(
         JSON.stringify({
           "$schema": "https://glama.ai/mcp/schemas/connector.json",
-          "claim": "glama_claim_hTd3BVD7jdJdptYc_KGhowTY4GN2C6RV"
+          "claim": "glama_claim_hTd3BVD7jDjdptYc_KGhowTY4GN2C6RV"
         })
       );
       return;
