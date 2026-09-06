@@ -874,6 +874,35 @@ function startHttpServer(port: number = 3000, host: string = '0.0.0.0') {
       return;
     }
 
+    if (url.pathname === '/.well-known/glama.json') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(
+        JSON.stringify({
+          "$schema": "https://glama.ai/mcp/schemas/connector.json",
+          "claim": "glama_claim_hTd3BVD7jdJdptYc_KGhowTY4GN2C6RV"
+        })
+      );
+      return;
+    }
+
+    if (url.pathname === '/.well-known/mcp/server-card.json' || url.pathname === '/.well-known/mcp.json') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(
+        JSON.stringify({
+          serverInfo: {
+            name: 'mcp-seo',
+            version: '1.0.5',
+            description: 'SEO, AEO, GEO, Local SEO & CRO Growth Auditor + Safe Code Fixer'
+          },
+          authentication: { required: false },
+          toolsCount: 21,
+          transport: 'streamable-http',
+          endpoints: { mcp: '/mcp', sse: '/sse', message: '/message', health: '/health' }
+        })
+      );
+      return;
+    }
+
     if (url.pathname === '/api/audit' || url.pathname === '/audit') {
       res.setHeader('Content-Type', 'application/json');
 
@@ -931,13 +960,18 @@ function startHttpServer(port: number = 3000, host: string = '0.0.0.0') {
       }
     }
 
-
     if (
       url.pathname === '/mcp' ||
       url.pathname === '/sse' ||
       url.pathname === '/message' ||
       url.pathname.startsWith('/mcp/')
     ) {
+      if (req.method === 'GET' && req.headers.accept?.includes('text/html') && !req.headers.accept?.includes('text/event-stream')) {
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end(getLandingPageHtml(port));
+        return;
+      }
+
       if (!req.headers.accept || req.headers.accept === '*/*' || !req.headers.accept.includes('text/event-stream')) {
         req.headers.accept = 'application/json, text/event-stream';
       }
