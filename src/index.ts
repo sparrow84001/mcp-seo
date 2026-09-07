@@ -39,7 +39,7 @@ import type { AuditIssue, ProjectDiscoveryResult } from './types/index.ts';
 // Initialize McpServer
 const server = new McpServer({
   name: 'mcp-seo',
-  version: '1.0.4'
+  version: '1.0.5'
 });
 
 // ==========================================
@@ -1024,4 +1024,3 @@ main().catch((err) => {
   console.error('Fatal server error:', err);
   process.exit(1);
 });
-

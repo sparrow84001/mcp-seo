@@ -6,6 +6,7 @@
 [![Bun](https://img.shields.io/badge/Bun-1.4.0-black.svg)](https://bun.sh)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
 [![Author](https://img.shields.io/badge/Author-Sayanta_Neogi-orange.svg)](https://github.com/sparrow84001)
+[![Glama Score](https://glama.ai/mcp/servers/sparrow84001/mcp-seo/badges/score.svg)](https://glama.ai/mcp/servers/sparrow84001/mcp-seo)
 
 An advanced, AI-powered Model Context Protocol (MCP) server that acts as a comprehensive **Growth Auditor, Search & AI Engine Optimizer, and Framework-Aware Code Fixer**.
 
@@ -111,6 +112,9 @@ Download `mcp-seo.exe` directly from the [GitHub Releases](https://github.com/sp
   }
 }
 ```
+
+### Glama.ai Listing & Score
+[![Glama Card](https://glama.ai/mcp/servers/sparrow84001/mcp-seo/badges/card.svg)](https://glama.ai/mcp/servers/sparrow84001/mcp-seo)
 
 ---
 
