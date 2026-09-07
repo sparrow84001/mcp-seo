@@ -279,9 +279,16 @@ server.registerPrompt(
 server.registerTool(
   'seo_discover_project',
   {
-    description: 'Discovers website framework (Laravel, Next.js App/Pages, Nuxt, Astro, Raw PHP, HTML), routes, sitemaps, robots.txt, llms.txt, and page inventory.',
+    description: `Discovers website architecture, detected web frameworks (Laravel Blade, Next.js App/Pages Router, Nuxt, Astro, PHP, static HTML), routing structure, existing sitemap/robots configurations, and page inventory.
+
+USAGE GUIDELINES:
+- Use when starting an audit of a local codebase to detect framework patterns and file routes.
+- Do NOT use for remote websites or live URLs; use 'seo_crawl_and_extract' or 'seo_audit_sitemap_multipage' instead.
+
+BEHAVIORAL TRANSPARENCY:
+- Safe, read-only local filesystem scan. Makes no network calls and modifies no files.`,
     inputSchema: {
-      projectPath: z.string().describe('Absolute or relative path to project root directory.')
+      projectPath: z.string().default('.').describe('Absolute or relative directory path to the website root (e.g., "." or "/path/to/project"). Defaults to current directory.')
     }
   },
   async ({ projectPath }) => {
@@ -295,10 +302,19 @@ server.registerTool(
 server.registerTool(
   'seo_crawl_and_extract',
   {
-    description: 'Crawls a live URL or reads a local template/HTML file to extract Title, Meta, Headings (H1-H6), Canonical, Schema (JSON-LD), OpenGraph, Links, and Images.',
+    description: `Crawls a live URL via HTTP or parses a local HTML/template file to extract raw SEO metadata: Title, Meta Description, Headings (H1-H6), Canonical URL, JSON-LD Schemas, OpenGraph/Twitter cards, links, and images.
+
+USAGE GUIDELINES:
+- Use to extract structured page metadata before running specialized audits or when analyzing a single page.
+- Do NOT use for multi-page batch crawling; use 'seo_audit_sitemap_multipage' instead.
+- Do NOT use to discover framework architecture; use 'seo_discover_project' instead.
+
+BEHAVIORAL TRANSPARENCY:
+- Read-only data extraction.
+- Issues HTTP GET requests for live URLs. Reads local files directly without modifying them.`,
     inputSchema: {
-      target: z.string().describe('Target live URL (https://...) or local file path.'),
-      pageType: z.string().optional().describe('Optional override for page type (homepage, service, product, blog, location, etc.).')
+      target: z.string().describe('Target live URL (e.g. "https://example.com") or local source/HTML file path (e.g. "./index.html").'),
+      pageType: z.string().optional().describe('Optional override for page classification (e.g. "homepage", "service", "product", "blog", "location"). Inferred automatically if omitted.')
     }
   },
   async ({ target, pageType }) => {
@@ -312,10 +328,19 @@ server.registerTool(
 server.registerTool(
   'seo_audit_technical',
   {
-    description: 'Performs Technical SEO audit: Canonical consistency, robots.txt, meta robots noindex/nofollow, sitemaps, trailing slash consistency, mixed content.',
+    description: `Performs a Technical SEO audit on a page or URL, checking canonical tag consistency, robots meta tags (noindex/nofollow), XML sitemap alignment, trailing slash consistency, HTTP mixed content, viewport, and charset declarations.
+
+USAGE GUIDELINES:
+- Use to audit indexing, crawlability, canonicalization, and technical header directives.
+- Do NOT use for on-page copy, headings, or keyword targeting; use 'seo_audit_onpage' instead.
+- Do NOT use for full site audits; use 'seo_audit_sitemap_multipage' or 'seo_generate_full_audit' instead.
+
+BEHAVIORAL TRANSPARENCY:
+- Safe, read-only diagnostic evaluation.
+- Issues HTTP GET requests if given a URL; reads local file if given a file path. No disk modifications.`,
     inputSchema: {
-      target: z.string().describe('Target file path or live URL.'),
-      projectPath: z.string().optional().describe('Optional project root path for sitemap/robots discovery.')
+      target: z.string().describe('Target live URL (e.g. "https://example.com") or local file path to audit.'),
+      projectPath: z.string().optional().describe('Optional project root path used to locate and cross-reference local sitemap.xml and robots.txt files.')
     }
   },
   async ({ target, projectPath }) => {
@@ -334,9 +359,17 @@ server.registerTool(
 server.registerTool(
   'seo_audit_onpage',
   {
-    description: 'Performs On-Page SEO audit: Title tag length/CTR/keywords, Meta Description, H1-H6 hierarchy, OpenGraph and Twitter cards.',
+    description: `Audits on-page SEO elements: Title tag length and keyword placement, Meta Description presence and CTR optimization, single H1 heading enforcement, H1-H6 hierarchy, OpenGraph, and Twitter card tags.
+
+USAGE GUIDELINES:
+- Use when evaluating page-level metadata, heading structures, and social sharing previews.
+- Do NOT use for technical indexing directives (canonical/robots); use 'seo_audit_technical' instead.
+- Do NOT use for structured data validation; use 'seo_audit_schema' instead.
+
+BEHAVIORAL TRANSPARENCY:
+- Safe, read-only diagnostic evaluation. No file modifications.`,
     inputSchema: {
-      target: z.string().describe('Target file path or live URL.')
+      target: z.string().describe('Target live URL (e.g. "https://example.com") or local file path to audit.')
     }
   },
   async ({ target }) => {
@@ -351,9 +384,17 @@ server.registerTool(
 server.registerTool(
   'seo_audit_aeo',
   {
-    description: 'Performs Answer Engine Optimization audit: Direct answer blocks, question headings (What/How/Why), FAQ schema alignment, concise definition snippets.',
+    description: `Audits content for Answer Engine Optimization (AEO): Evaluates concise 40-60 word direct answer definition blocks, question-based H2/H3 subheadings (What/How/Why), FAQ schema alignment, and citation readiness for Google AI Overviews and Perplexity.
+
+USAGE GUIDELINES:
+- Use when optimizing content to win conversational AI search citations, direct answers, and Perplexity summaries.
+- Do NOT use for brand knowledge-graph entity reconciliation; use 'seo_audit_geo' instead.
+- Do NOT use for standard on-page metadata; use 'seo_audit_onpage' instead.
+
+BEHAVIORAL TRANSPARENCY:
+- Safe, read-only diagnostic evaluation. No file modifications.`,
     inputSchema: {
-      target: z.string().describe('Target file path or live URL.')
+      target: z.string().describe('Target live URL (e.g. "https://example.com/topic") or local file path to audit.')
     }
   },
   async ({ target }) => {
@@ -368,9 +409,17 @@ server.registerTool(
 server.registerTool(
   'seo_audit_geo',
   {
-    description: 'Performs Generative Engine Optimization audit: Brand/Organization entities, sameAs knowledge graph reconciliation, Author E-E-A-T credentials, service relationships.',
+    description: `Audits Generative Engine Optimization (GEO): Evaluates brand and organization entities, Schema.org Organization/Person definitions, sameAs knowledge graph reconciliation (Wikidata, LinkedIn, Crunchbase), and Author E-E-A-T credentials.
+
+USAGE GUIDELINES:
+- Use to evaluate how LLM-based search engines (ChatGPT Search, Claude, Gemini) comprehend brand identity and authority.
+- Do NOT use for local map pack NAP consistency; use 'seo_audit_local' instead.
+- Do NOT use for direct answer snippet definitions; use 'seo_audit_aeo' instead.
+
+BEHAVIORAL TRANSPARENCY:
+- Safe, read-only diagnostic evaluation. No file modifications.`,
     inputSchema: {
-      target: z.string().describe('Target file path or live URL.')
+      target: z.string().describe('Target live URL (e.g. "https://example.com") or local file path to audit.')
     }
   },
   async ({ target }) => {
@@ -385,9 +434,16 @@ server.registerTool(
 server.registerTool(
   'seo_audit_local',
   {
-    description: 'Performs Local & Area SEO audit: LocalBusiness schema completeness, visible NAP consistency, click-to-call phone, address validation, location page duplication.',
+    description: `Audits Local and Area SEO: Evaluates LocalBusiness Schema.org JSON-LD, visible Name-Address-Phone (NAP) consistency, click-to-call telephone links, Google Maps embed signals, and detects doorway city page duplication.
+
+USAGE GUIDELINES:
+- Use for local business websites, multi-location practices, and regional service providers.
+- Do NOT use for pure SaaS, digital-only, or non-geographic websites; use 'seo_audit_technical' or 'seo_audit_onpage' instead.
+
+BEHAVIORAL TRANSPARENCY:
+- Safe, read-only diagnostic evaluation. No file modifications.`,
     inputSchema: {
-      target: z.string().describe('Target file path or live URL.')
+      target: z.string().describe('Target live URL (e.g. "https://example.com/chicago") or local file path to audit.')
     }
   },
   async ({ target }) => {
@@ -402,9 +458,17 @@ server.registerTool(
 server.registerTool(
   'seo_audit_content',
   {
-    description: 'Audits content quality, search intent classification (Informational, Commercial, Transactional, Navigational), thin content risks, readability, and E-E-A-T signals.',
+    description: `Evaluates content depth, search intent classification (Informational, Commercial, Transactional, Navigational), word count thresholds, thin content risks, reading ease, and Google E-E-A-T trust signals.
+
+USAGE GUIDELINES:
+- Use to analyze article or landing page editorial quality, substance, and intent alignment.
+- Do NOT use for code-level schema validation; use 'seo_audit_schema' instead.
+- Do NOT use to generate marketing campaigns; use 'seo_generate_marketing_strategy' instead.
+
+BEHAVIORAL TRANSPARENCY:
+- Safe, read-only content analysis. No file modifications.`,
     inputSchema: {
-      target: z.string().describe('Target file path or live URL.')
+      target: z.string().describe('Target live URL (e.g. "https://example.com/blog/guide") or local file path to audit.')
     }
   },
   async ({ target }) => {
@@ -419,9 +483,16 @@ server.registerTool(
 server.registerTool(
   'seo_audit_conversion',
   {
-    description: 'Audits Conversion Rate Optimization (CRO) & digital marketing: Primary/secondary CTAs, contact channels (forms, phone, WhatsApp), social proof, risk reversal.',
+    description: `Audits Conversion Rate Optimization (CRO) and user conversion signals: High-contrast primary/secondary CTAs, contact channel accessibility (forms, phone, WhatsApp), social proof badges, mobile floating action buttons, and risk reversal guarantees.
+
+USAGE GUIDELINES:
+- Use to evaluate landing pages, pricing pages, and checkout/contact funnels for conversion friction.
+- Do NOT use for organic ranking signals (canonical, meta); use 'seo_audit_onpage' or 'seo_audit_technical' instead.
+
+BEHAVIORAL TRANSPARENCY:
+- Safe, read-only CRO analysis. No file modifications.`,
     inputSchema: {
-      target: z.string().describe('Target file path or live URL.')
+      target: z.string().describe('Target live URL (e.g. "https://example.com/pricing") or local file path to audit.')
     }
   },
   async ({ target }) => {
@@ -436,9 +507,16 @@ server.registerTool(
 server.registerTool(
   'seo_audit_performance',
   {
-    description: 'Identifies code-level Core Web Vitals risks: CLS risks (images without width/height), LCP risks (legacy image formats), and render-blocking scripts.',
+    description: `Identifies code-level Core Web Vitals risks: Cumulative Layout Shift (CLS) risks from images lacking explicit width/height attributes, Largest Contentful Paint (LCP) risks from unoptimized formats, and render-blocking scripts.
+
+USAGE GUIDELINES:
+- Use to detect static HTML and template performance defects that harm search rankings and Core Web Vitals.
+- Do NOT use as a real-time synthetic browser lab benchmark (like Lighthouse); this tool performs static source code analysis.
+
+BEHAVIORAL TRANSPARENCY:
+- Safe, read-only performance diagnostic. No file modifications.`,
     inputSchema: {
-      target: z.string().describe('Target file path or live URL.')
+      target: z.string().describe('Target live URL (e.g. "https://example.com") or local file path to audit.')
     }
   },
   async ({ target }) => {
@@ -453,9 +531,16 @@ server.registerTool(
 server.registerTool(
   'seo_audit_schema',
   {
-    description: 'Extracts and validates Schema.org structured data (Organization, LocalBusiness, FAQPage, Service, Product, BreadcrumbList, Article) for JSON syntax and completeness.',
+    description: `Extracts and validates Schema.org JSON-LD structured data (Organization, LocalBusiness, FAQPage, Service, Product, BreadcrumbList, Article) for syntax correctness, required properties, and Google rich result eligibility.
+
+USAGE GUIDELINES:
+- Use to inspect whether structured data is correctly embedded and free of JSON syntax or validation errors.
+- Do NOT use to apply schema fixes to files; use 'seo_generate_code_fix' with the 'jsonLdSchema' parameter instead.
+
+BEHAVIORAL TRANSPARENCY:
+- Safe, read-only validation tool. No file modifications.`,
     inputSchema: {
-      target: z.string().describe('Target file path or live URL.')
+      target: z.string().describe('Target live URL (e.g. "https://example.com") or local file path to inspect.')
     }
   },
   async ({ target }) => {
@@ -470,9 +555,16 @@ server.registerTool(
 server.registerTool(
   'seo_audit_internal_links',
   {
-    description: 'Audits internal link architecture, generic anchor text, orphan pages, and generates high-value contextual linking recommendations.',
+    description: `Audits internal linking structure, identifies generic anchor text ('click here', 'read more'), flags orphan pages, and suggests high-value contextual links between blog articles and service pages.
+
+USAGE GUIDELINES:
+- Use to improve PageRank flow, internal topic clustering, and anchor text relevance across pages.
+- Do NOT use to inspect external backlink profiles; use 'seo_suggest_related_ecosystem' for off-page targets.
+
+BEHAVIORAL TRANSPARENCY:
+- Safe, read-only link graph analysis. No file modifications.`,
     inputSchema: {
-      target: z.string().describe('Target file path or live URL.')
+      target: z.string().describe('Target live URL (e.g. "https://example.com") or local file path to audit.')
     }
   },
   async ({ target }) => {
@@ -487,10 +579,18 @@ server.registerTool(
 server.registerTool(
   'seo_generate_full_audit',
   {
-    description: 'Runs the complete 8-dimension audit suite, computes 0-100 scores and letter grades, builds the P0-P3 prioritized action matrix, and outputs formatted Markdown report.',
+    description: `Executes the comprehensive 8-dimension audit suite across Technical, On-Page, AEO, GEO, Local, Content, CRO, and Performance. Calculates 0-100 scores, letter grades (A+ to F), P0-P3 prioritized action matrix, and formatted Markdown report.
+
+USAGE GUIDELINES:
+- Use as the primary single-page audit tool when a complete health check and executive scorecard is needed.
+- Do NOT use for entire multi-page domain crawls; use 'seo_audit_sitemap_multipage' instead.
+- Do NOT use if you only need a single specific dimension; use the dedicated 'seo_audit_*' tools instead for faster response.
+
+BEHAVIORAL TRANSPARENCY:
+- Safe, read-only comprehensive synthesis. Generates Markdown and JSON reports without modifying files.`,
     inputSchema: {
-      target: z.string().describe('Target file path or live URL.'),
-      projectPath: z.string().optional().describe('Optional project root directory.')
+      target: z.string().describe('Target live URL (e.g. "https://example.com") or local file path to audit.'),
+      projectPath: z.string().optional().describe('Optional project root path for framework and routing context.')
     }
   },
   async ({ target, projectPath }) => {
@@ -528,10 +628,18 @@ server.registerTool(
 server.registerTool(
   'seo_generate_marketing_strategy',
   {
-    description: 'Generates a comprehensive digital marketing strategy blueprint, buyer intent & funnel mapping, CRO recommendations, AEO AI overview tactics, and a 30-60-90 day growth roadmap.',
+    description: `Synthesizes audit findings into a high-impact digital marketing growth blueprint: Maps search intent across ToFu/MoFu/BoFu funnels, provides CRO conversion levers, outlines AEO answer capture tactics, and delivers a 30-60-90 day growth roadmap.
+
+USAGE GUIDELINES:
+- Use when preparing a strategic marketing plan, client proposal, or business growth recommendations based on site audit data.
+- Do NOT use to apply code fixes to files; use 'seo_generate_code_fix' instead.
+- Do NOT use for quick technical diagnostic checks; use 'seo_audit_technical' instead.
+
+BEHAVIORAL TRANSPARENCY:
+- Safe, read-only strategic synthesis. Produces strategic Markdown plans without modifying any files.`,
     inputSchema: {
-      target: z.string().describe('Target file path or live URL.'),
-      projectPath: z.string().optional().describe('Optional project root directory.')
+      target: z.string().describe('Target live URL (e.g. "https://example.com") or local file path to analyze.'),
+      projectPath: z.string().optional().describe('Optional project root directory path to enrich strategy with architecture context.')
     }
   },
   async ({ target, projectPath }) => {
@@ -569,16 +677,25 @@ server.registerTool(
 server.registerTool(
   'seo_generate_code_fix',
   {
-    description: 'Generates surgical, framework-aware code fixes (Laravel Blade, Next.js App/Pages, HTML, PHP, Astro, Svelte) including WebMCP discovery link injection with unified diff preview. Set applyDirectly to true to write changes.',
+    description: `Generates framework-aware code fixes (Laravel Blade, Next.js App/Pages Router, HTML, PHP, Astro, Svelte) for missing titles, meta descriptions, canonical URLs, JSON-LD schemas, and WebMCP discovery links with unified diff preview.
+
+USAGE GUIDELINES:
+- Use after audit tools detect specific SEO, schema, or WebMCP issues in a source file.
+- Do NOT use for general code refactoring unrelated to metadata, schema, or SEO tags.
+- Always run 'seo_validate_code_fix' immediately after applying changes to verify syntax and prevent duplicate tags.
+
+BEHAVIORAL TRANSPARENCY:
+- Non-destructive by default: Returns unified diff preview without modifying files.
+- Modifies disk ONLY when 'applyDirectly' is explicitly set to true.`,
     inputSchema: {
-      filePath: z.string().describe('Path to the source file to modify.'),
-      title: z.string().optional().describe('New or updated title tag.'),
-      metaDescription: z.string().optional().describe('New or updated meta description.'),
-      canonicalUrl: z.string().optional().describe('Canonical URL.'),
-      jsonLdSchema: z.record(z.string(), z.any()).optional().describe('Schema.org JSON-LD object to inject.'),
-      webMcpEndpoint: z.string().optional().describe('WebMCP endpoint URL to inject into HTML <head> via <link rel="mcp-server" /> (e.g. /mcp or /api/mcp).'),
-      addWebMcpDiscovery: z.boolean().optional().describe('Whether to inject standard <link rel="mcp-server" href="/mcp" /> tag.'),
-      applyDirectly: z.boolean().optional().describe('Whether to write changes directly to disk (default: false).')
+      filePath: z.string().describe('Path to source code file to modify (e.g., "./pages/index.tsx" or "resources/views/welcome.blade.php").'),
+      title: z.string().optional().describe('New or updated title tag text.'),
+      metaDescription: z.string().optional().describe('New or updated meta description string.'),
+      canonicalUrl: z.string().optional().describe('Canonical URL (e.g. "https://example.com/page").'),
+      jsonLdSchema: z.record(z.string(), z.any()).optional().describe('Valid Schema.org JSON-LD object to inject into HTML head.'),
+      webMcpEndpoint: z.string().optional().describe('WebMCP endpoint URL to inject into HTML head via <link rel="mcp-server" /> (e.g. "/mcp" or "/api/mcp").'),
+      addWebMcpDiscovery: z.boolean().optional().describe('Whether to inject standard <link rel="mcp-server" href="/mcp" /> tag. Default: false.'),
+      applyDirectly: z.boolean().optional().describe('Whether to apply changes directly to disk. Default: false (returns diff preview only for review).')
     }
   },
   async (args) => {
@@ -592,10 +709,17 @@ server.registerTool(
 server.registerTool(
   'seo_validate_code_fix',
   {
-    description: 'Validates modified code files for duplicate meta tags, JSON-LD syntax errors, and calculates Before vs After score improvements.',
+    description: `Validates modified source files against syntax errors, duplicate meta/title tags, broken JSON-LD syntax, and calculates Before vs After SEO score improvements.
+
+USAGE GUIDELINES:
+- Use immediately after generating or applying a code fix via 'seo_generate_code_fix' to verify correctness.
+- Do NOT use as a standalone audit on unedited files; use 'seo_audit_onpage' or 'seo_generate_full_audit' instead.
+
+BEHAVIORAL TRANSPARENCY:
+- Safe, read-only file validation. Reads the modified file and performs AST/regex checks without making further modifications.`,
     inputSchema: {
-      filePath: z.string().describe('Path to modified source file.'),
-      beforeScores: z.record(z.string(), z.number()).optional().describe('Optional previous dimension scores to compute score diff.')
+      filePath: z.string().describe('Path to the modified source code file to validate.'),
+      beforeScores: z.record(z.string(), z.number()).optional().describe('Optional map of previous dimension scores (0-100) to compute exact before vs after score delta.')
     }
   },
   async ({ filePath, beforeScores }) => {
@@ -609,9 +733,17 @@ server.registerTool(
 server.registerTool(
   'seo_suggest_related_ecosystem',
   {
-    description: 'Discovers related website ecosystems, infers market vertical & competitor archetypes, suggests high-authority directory/backlink targets, and generates keyword topic clusters.',
+    description: `Analyzes a website to infer its market vertical, benchmark competitor archetypes, identify high-authority backlink and directory targets, and build keyword topic clusters.
+
+USAGE GUIDELINES:
+- Use to expand organic reach, plan off-page directory submissions, and identify competitor benchmarks.
+- Do NOT use for on-page code repairs; use 'seo_generate_code_fix' instead.
+- Do NOT use for protocol validation; use 'seo_test_web_mcp' instead.
+
+BEHAVIORAL TRANSPARENCY:
+- Safe, read-only ecosystem analysis. Makes no modifications to codebase or remote sites.`,
     inputSchema: {
-      target: z.string().describe('Directory path to the website codebase or a live URL (https://...) to analyze.')
+      target: z.string().describe('Website codebase directory path (e.g. ".") or live URL (e.g. "https://example.com").')
     }
   },
   async ({ target }) => {
@@ -636,9 +768,16 @@ server.registerTool(
 server.registerTool(
   'seo_test_web_mcp',
   {
-    description: 'Tests a live website or local codebase to check if Web MCP (Streamable HTTP/SSE endpoint, manifest, or DOM tools) is enabled, runs protocol compliance diagnostics, and provides language-specific implementation code fixes.',
+    description: `Tests a live website or local endpoint for Web MCP enablement: Checks Streamable HTTP (/mcp), Legacy SSE (/sse), discovery manifests (/.well-known/mcp/server-card.json, llms.txt), CORS headers, and provides copy-paste implementation blueprints in 11 programming languages.
+
+USAGE GUIDELINES:
+- Use to test if a web application exposes an agent-accessible Model Context Protocol interface.
+- Do NOT use for regular HTML search engine optimization; use 'seo_audit_technical' or 'seo_audit_onpage' instead.
+
+BEHAVIORAL TRANSPARENCY:
+- Safe, read-only protocol diagnostic probe. Makes HTTP GET/HEAD requests to standard discovery endpoints. Modifies no files.`,
     inputSchema: {
-      url: z.string().describe('Live website URL to test for Web MCP enablement (e.g. https://example.com).'),
+      url: z.string().describe('Live website URL to test for Web MCP support (e.g. "https://example.com").'),
       targetLanguage: z.enum([
         'typescript-node',
         'nextjs-app',
@@ -652,7 +791,7 @@ server.registerTool(
         'ruby-rails',
         'static-browser-dom',
         'all'
-      ]).optional().describe('Optional target programming language or framework to generate customized code fixes for.')
+      ]).optional().describe('Optional target programming language or framework to generate customized code blueprints for.')
     }
   },
   async ({ url, targetLanguage }) => {
@@ -676,13 +815,21 @@ server.registerTool(
 
 server.registerTool(
   'seo_audit_sitemap_multipage',
-
   {
-    description: 'Crawls and audits every page registered in a website sitemap.xml (or local routes), cross-checks robots.txt allow/disallow rules, inspects HTTP security headers (HSTS, CSP), and generates a site-wide SEO/AEO/GEO/CRO health score, inventory table, and remediation roadmap.',
+    description: `Crawls and batch-audits all pages registered in a website sitemap.xml (or local discovered routes), cross-checks robots.txt allow/disallow rules, audits HTTP security headers (HSTS, CSP, X-Frame-Options), and compiles a site-wide scorecard and inventory report.
+
+USAGE GUIDELINES:
+- Use when auditing an entire website with multiple pages rather than a single URL.
+- Do NOT use for single page analysis; use 'seo_generate_full_audit' instead for faster single-page feedback.
+- Do NOT use to generate new sitemaps; use 'seo_generate_sitemap_and_robots' instead.
+
+BEHAVIORAL TRANSPARENCY:
+- Read-only batch crawl.
+- Issues HTTP GET requests respecting robots.txt directives and maxPages limits. Makes no disk modifications.`,
     inputSchema: {
-      target: z.string().describe('Website URL (https://...) or local codebase folder path.'),
-      maxPages: z.number().optional().describe('Maximum number of sitemap URLs to crawl and audit (default: 25).'),
-      userAgent: z.string().optional().describe('Target crawler user-agent to test robots.txt permissions against (default: Googlebot).')
+      target: z.string().describe('Website base URL (e.g. "https://example.com") or local codebase folder path.'),
+      maxPages: z.number().optional().describe('Maximum number of sitemap URLs to crawl and audit (default: 25, recommended max: 50).'),
+      userAgent: z.string().optional().describe('Target crawler user-agent to evaluate robots.txt permissions against (default: "Googlebot").')
     }
   },
   async ({ target, maxPages, userAgent }) => {
@@ -706,9 +853,16 @@ server.registerTool(
 server.registerTool(
   'seo_audit_robots_and_sitemap',
   {
-    description: 'Deeply inspects robots.txt rules (allow/disallow per user-agent), sitemap.xml validity, disallowed pages mistakenly in sitemap, and HTTP security headers (HSTS, CSP, X-Frame-Options).',
+    description: `Inspects robots.txt rules (allow/disallow per user-agent), sitemap index validity, detects contradictory directives (e.g. disallowed pages mistakenly included in sitemap.xml), and audits HTTP security headers.
+
+USAGE GUIDELINES:
+- Use to inspect crawl configuration and indexation guardrails for Googlebot, GPTBot, ClaudeBot, and PerplexityBot.
+- Do NOT use for crawling page body content; use 'seo_audit_sitemap_multipage' or 'seo_crawl_and_extract' instead.
+
+BEHAVIORAL TRANSPARENCY:
+- Safe, read-only network/file inspection. Fetches robots.txt and sitemap.xml without modifying them.`,
     inputSchema: {
-      target: z.string().describe('Website URL (https://...) or local codebase folder path.')
+      target: z.string().describe('Website URL (e.g. "https://example.com") or local codebase folder path.')
     }
   },
   async ({ target }) => {
@@ -739,11 +893,19 @@ server.registerTool(
 server.registerTool(
   'seo_generate_sitemap_and_robots',
   {
-    description: 'Generates standard-compliant, production-ready sitemap.xml and robots.txt configuration files for any website or codebase.',
+    description: `Generates production-ready, standard-compliant sitemap.xml and robots.txt files with crawler directives for Googlebot, Bingbot, and AI search engines (GPTBot, ClaudeBot, PerplexityBot).
+
+USAGE GUIDELINES:
+- Use when a website is missing sitemap.xml or robots.txt, or needs clean, updated configuration files.
+- Do NOT use to audit existing files; use 'seo_audit_robots_and_sitemap' instead.
+- Do NOT use to crawl pages; use 'seo_audit_sitemap_multipage' instead.
+
+BEHAVIORAL TRANSPARENCY:
+- Pure generation tool. Returns formatted XML and robots.txt file contents as text output. Does not write to disk directly unless copied by user.`,
     inputSchema: {
-      targetUrl: z.string().describe('Base website URL (e.g., https://example.com).'),
-      urls: z.array(z.string()).optional().describe('Array of relative or absolute URLs to register in sitemap.xml.'),
-      disallowedPaths: z.array(z.string()).optional().describe('Paths to disallow in robots.txt (e.g. ["/admin/", "/api/private/"]).')
+      targetUrl: z.string().describe('Base website domain URL (e.g. "https://example.com").'),
+      urls: z.array(z.string()).optional().describe('List of relative or absolute URLs to register in sitemap.xml (e.g. ["/", "/about", "/pricing"]).'),
+      disallowedPaths: z.array(z.string()).optional().describe('URL path prefixes to disallow in robots.txt (e.g. ["/admin/", "/api/private/"]).')
     }
   },
   async ({ targetUrl, urls, disallowedPaths }) => {
