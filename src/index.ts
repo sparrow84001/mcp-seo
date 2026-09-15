@@ -289,6 +289,12 @@ BEHAVIORAL TRANSPARENCY:
 - Safe, read-only local filesystem scan. Makes no network calls and modifies no files.`,
     inputSchema: {
       projectPath: z.string().default('.').describe('Absolute or relative directory path to the website root (e.g., "." or "/path/to/project"). Defaults to current directory.')
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false
     }
   },
   async ({ projectPath }) => {
@@ -315,6 +321,12 @@ BEHAVIORAL TRANSPARENCY:
     inputSchema: {
       target: z.string().describe('Target live URL (e.g. "https://example.com") or local source/HTML file path (e.g. "./index.html").'),
       pageType: z.string().optional().describe('Optional override for page classification (e.g. "homepage", "service", "product", "blog", "location"). Inferred automatically if omitted.')
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true
     }
   },
   async ({ target, pageType }) => {
@@ -341,6 +353,12 @@ BEHAVIORAL TRANSPARENCY:
     inputSchema: {
       target: z.string().describe('Target live URL (e.g. "https://example.com") or local file path to audit.'),
       projectPath: z.string().optional().describe('Optional project root path used to locate and cross-reference local sitemap.xml and robots.txt files.')
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true
     }
   },
   async ({ target, projectPath }) => {
@@ -370,6 +388,12 @@ BEHAVIORAL TRANSPARENCY:
 - Safe, read-only diagnostic evaluation. No file modifications.`,
     inputSchema: {
       target: z.string().describe('Target live URL (e.g. "https://example.com") or local file path to audit.')
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true
     }
   },
   async ({ target }) => {
@@ -395,6 +419,12 @@ BEHAVIORAL TRANSPARENCY:
 - Safe, read-only diagnostic evaluation. No file modifications.`,
     inputSchema: {
       target: z.string().describe('Target live URL (e.g. "https://example.com/topic") or local file path to audit.')
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true
     }
   },
   async ({ target }) => {
@@ -420,6 +450,12 @@ BEHAVIORAL TRANSPARENCY:
 - Safe, read-only diagnostic evaluation. No file modifications.`,
     inputSchema: {
       target: z.string().describe('Target live URL (e.g. "https://example.com") or local file path to audit.')
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true
     }
   },
   async ({ target }) => {
@@ -444,6 +480,12 @@ BEHAVIORAL TRANSPARENCY:
 - Safe, read-only diagnostic evaluation. No file modifications.`,
     inputSchema: {
       target: z.string().describe('Target live URL (e.g. "https://example.com/chicago") or local file path to audit.')
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true
     }
   },
   async ({ target }) => {
@@ -469,6 +511,12 @@ BEHAVIORAL TRANSPARENCY:
 - Safe, read-only content analysis. No file modifications.`,
     inputSchema: {
       target: z.string().describe('Target live URL (e.g. "https://example.com/blog/guide") or local file path to audit.')
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true
     }
   },
   async ({ target }) => {
@@ -493,6 +541,12 @@ BEHAVIORAL TRANSPARENCY:
 - Safe, read-only CRO analysis. No file modifications.`,
     inputSchema: {
       target: z.string().describe('Target live URL (e.g. "https://example.com/pricing") or local file path to audit.')
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true
     }
   },
   async ({ target }) => {
@@ -517,6 +571,12 @@ BEHAVIORAL TRANSPARENCY:
 - Safe, read-only performance diagnostic. No file modifications.`,
     inputSchema: {
       target: z.string().describe('Target live URL (e.g. "https://example.com") or local file path to audit.')
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true
     }
   },
   async ({ target }) => {
@@ -541,6 +601,12 @@ BEHAVIORAL TRANSPARENCY:
 - Safe, read-only validation tool. No file modifications.`,
     inputSchema: {
       target: z.string().describe('Target live URL (e.g. "https://example.com") or local file path to inspect.')
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true
     }
   },
   async ({ target }) => {
@@ -565,6 +631,12 @@ BEHAVIORAL TRANSPARENCY:
 - Safe, read-only link graph analysis. No file modifications.`,
     inputSchema: {
       target: z.string().describe('Target live URL (e.g. "https://example.com") or local file path to audit.')
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true
     }
   },
   async ({ target }) => {
@@ -591,6 +663,12 @@ BEHAVIORAL TRANSPARENCY:
     inputSchema: {
       target: z.string().describe('Target live URL (e.g. "https://example.com") or local file path to audit.'),
       projectPath: z.string().optional().describe('Optional project root path for framework and routing context.')
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true
     }
   },
   async ({ target, projectPath }) => {
@@ -640,6 +718,12 @@ BEHAVIORAL TRANSPARENCY:
     inputSchema: {
       target: z.string().describe('Target live URL (e.g. "https://example.com") or local file path to analyze.'),
       projectPath: z.string().optional().describe('Optional project root directory path to enrich strategy with architecture context.')
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true
     }
   },
   async ({ target, projectPath }) => {
@@ -696,6 +780,12 @@ BEHAVIORAL TRANSPARENCY:
       webMcpEndpoint: z.string().optional().describe('WebMCP endpoint URL to inject into HTML head via <link rel="mcp-server" /> (e.g. "/mcp" or "/api/mcp").'),
       addWebMcpDiscovery: z.boolean().optional().describe('Whether to inject standard <link rel="mcp-server" href="/mcp" /> tag. Default: false.'),
       applyDirectly: z.boolean().optional().describe('Whether to apply changes directly to disk. Default: false (returns diff preview only for review).')
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false
     }
   },
   async (args) => {
@@ -720,6 +810,12 @@ BEHAVIORAL TRANSPARENCY:
     inputSchema: {
       filePath: z.string().describe('Path to the modified source code file to validate.'),
       beforeScores: z.record(z.string(), z.number()).optional().describe('Optional map of previous dimension scores (0-100) to compute exact before vs after score delta.')
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false
     }
   },
   async ({ filePath, beforeScores }) => {
@@ -744,6 +840,12 @@ BEHAVIORAL TRANSPARENCY:
 - Safe, read-only ecosystem analysis. Makes no modifications to codebase or remote sites.`,
     inputSchema: {
       target: z.string().describe('Website codebase directory path (e.g. ".") or live URL (e.g. "https://example.com").')
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true
     }
   },
   async ({ target }) => {
@@ -792,6 +894,12 @@ BEHAVIORAL TRANSPARENCY:
         'static-browser-dom',
         'all'
       ]).optional().describe('Optional target programming language or framework to generate customized code blueprints for.')
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true
     }
   },
   async ({ url, targetLanguage }) => {
@@ -830,6 +938,12 @@ BEHAVIORAL TRANSPARENCY:
       target: z.string().describe('Website base URL (e.g. "https://example.com") or local codebase folder path.'),
       maxPages: z.number().optional().describe('Maximum number of sitemap URLs to crawl and audit (default: 25, recommended max: 50).'),
       userAgent: z.string().optional().describe('Target crawler user-agent to evaluate robots.txt permissions against (default: "Googlebot").')
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true
     }
   },
   async ({ target, maxPages, userAgent }) => {
@@ -863,6 +977,12 @@ BEHAVIORAL TRANSPARENCY:
 - Safe, read-only network/file inspection. Fetches robots.txt and sitemap.xml without modifying them.`,
     inputSchema: {
       target: z.string().describe('Website URL (e.g. "https://example.com") or local codebase folder path.')
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true
     }
   },
   async ({ target }) => {
@@ -906,6 +1026,12 @@ BEHAVIORAL TRANSPARENCY:
       targetUrl: z.string().describe('Base website domain URL (e.g. "https://example.com").'),
       urls: z.array(z.string()).optional().describe('List of relative or absolute URLs to register in sitemap.xml (e.g. ["/", "/about", "/pricing"]).'),
       disallowedPaths: z.array(z.string()).optional().describe('URL path prefixes to disallow in robots.txt (e.g. ["/admin/", "/api/private/"]).')
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false
     }
   },
   async ({ targetUrl, urls, disallowedPaths }) => {
