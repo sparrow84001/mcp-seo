@@ -7,7 +7,6 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
 [![Author](https://img.shields.io/badge/Author-Sayanta_Neogi-orange.svg)](https://github.com/sparrow84001)
 [![Glama Score](https://glama.ai/mcp/servers/sparrow84001/mcp-seo/badges/score.svg)](https://glama.ai/mcp/servers/sparrow84001/mcp-seo)
-[![M8ven Score](https://m8ven.ai/badge/mcp/sparrow84001/mcp-seo)](https://m8ven.ai/mcp/sparrow84001/mcp-seo)
 [![M8ven Live Monitored](https://m8ven.ai/badge/mcp/sparrow84001-mcp-seo-1nlfqh)](https://m8ven.ai/mcp/sparrow84001-mcp-seo-1nlfqh)
 
 An advanced, AI-powered Model Context Protocol (MCP) server that acts as a comprehensive **Growth Auditor, Search & AI Engine Optimizer, and Framework-Aware Code Fixer**.
