@@ -76,7 +76,7 @@ describe('Comprehensive Tool Coverage Suite (100% MCP Tools Reference)', () => {
   });
 
   it('tests tool: seo_crawl_and_extract', async () => {
-    const page = extractPageDataFromHtml(sampleHtml, { url: 'https://example.com' });
+    const page = extractPageDataFromHtml(sampleHtml, { url: 'https://example.com', pageType: 'service', baseUrl: 'https://example.com' });
     expect(page).toBeDefined();
     expect(page.title).toBeDefined();
   });
@@ -133,13 +133,15 @@ describe('Comprehensive Tool Coverage Suite (100% MCP Tools Reference)', () => {
   });
 
   it('tests tool: seo_generate_full_audit', () => {
-    const report = generateAuditReport(samplePageData.url, samplePageData, []);
+    const target = samplePageData.url || 'https://example.com';
+    const report = generateAuditReport(target, samplePageData, []);
     expect(report.scores).toBeDefined();
     expect(report.scores.technical).toBeDefined();
   });
 
   it('tests tool: seo_generate_marketing_strategy', () => {
-    const strategy = generateMarketingStrategy(samplePageData.url, samplePageData, []);
+    const target = samplePageData.url || 'https://example.com';
+    const strategy = generateMarketingStrategy(target, samplePageData, []);
     expect(strategy.marketingReadinessGrade).toBeDefined();
     expect(strategy.executionRoadmap).toBeDefined();
   });
@@ -160,21 +162,22 @@ describe('Comprehensive Tool Coverage Suite (100% MCP Tools Reference)', () => {
   });
 
   it('tests tool: seo_suggest_related_ecosystem', () => {
-    const ecosystem = suggestRelatedEcosystem(samplePageData.url, samplePageData);
+    const target = samplePageData.url || 'https://example.com';
+    const ecosystem = suggestRelatedEcosystem(target, samplePageData);
     expect(ecosystem.nicheProfile.vertical).toBeDefined();
     expect(ecosystem.competitorArchetypes.length).toBeGreaterThan(0);
   });
 
   it('tests tool: seo_test_web_mcp', async () => {
-    const result = await testWebMcpSupport(samplePageData.url, samplePageData);
-    expect(result.targetUrl).toBe(samplePageData.url);
+    const target = samplePageData.url || 'https://example.com';
+    const result = await testWebMcpSupport(target, samplePageData);
+    expect(result.targetUrl).toBe(target);
     expect(result.diagnostics).toBeDefined();
   });
 
   it('tests tool: seo_audit_sitemap_multipage', async () => {
     const result = await auditSitemapMultipage('https://example.com', {
-      maxPages: 2,
-      mockPages: [samplePageData]
+      maxPages: 2
     });
     expect(result.target).toBeDefined();
   });
